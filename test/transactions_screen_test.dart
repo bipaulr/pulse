@@ -86,7 +86,10 @@ void main() {
       await tester.tap(chip('Income'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Salary'), findsOneWidget);
+      // Several months of payroll credits now share the name "Salary", so
+      // assert on a uniquely-named income record as well.
+      expect(find.text('Salary'), findsWidgets);
+      expect(find.text('Freelance Payout'), findsOneWidget);
       expect(find.text('Swiggy'), findsNothing);
 
       await tester.tap(chip('All'));

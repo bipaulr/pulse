@@ -16,4 +16,5 @@ export 'pulse_icon_button.dart';
 export 'pulse_payment_card.dart';
 export 'pulse_section_header.dart';
 export 'pulse_skeleton.dart';
+export 'pulse_spending_chart.dart';
 export 'pulse_transaction_tile.dart';

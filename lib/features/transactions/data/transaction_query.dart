@@ -13,7 +13,10 @@ enum TransactionFilter {
   shopping('Shopping', TransactionCategory.shopping),
   transport('Transport', TransactionCategory.transport),
   bills('Bills', TransactionCategory.bills),
-  entertainment('Entertainment', TransactionCategory.entertainment);
+  entertainment('Entertainment', TransactionCategory.entertainment),
+  travel('Travel', TransactionCategory.travel),
+  health('Health', TransactionCategory.health),
+  investments('Investments', TransactionCategory.investments);
 
   const TransactionFilter(this.label, [this.category]);
 

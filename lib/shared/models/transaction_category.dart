@@ -10,6 +10,9 @@ enum TransactionCategory {
   transport('Transport', Icons.directions_car_rounded),
   entertainment('Entertainment', Icons.play_circle_fill_rounded),
   bills('Bills', Icons.receipt_long_rounded),
+  travel('Travel', Icons.flight_takeoff_rounded),
+  health('Health', Icons.favorite_rounded),
+  investments('Investments', Icons.account_balance_rounded),
   transfer('Transfer', Icons.swap_horiz_rounded),
   income('Income', Icons.savings_rounded);
 

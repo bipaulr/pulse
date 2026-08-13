@@ -22,4 +22,12 @@ abstract final class PulseSpacing {
   /// Space to leave at the bottom of scroll views so content clears the
   /// floating bottom navigation.
   static const double bottomNavClearance = 108;
+
+  /// Widest the app's content column is allowed to get.
+  ///
+  /// Pulse is designed as a phone product; on a desktop-width window the
+  /// content centres in a column of this width rather than stretching, so the
+  /// cards and chart keep their intended proportions. Below this width it has
+  /// no effect at all.
+  static const double maxContentWidth = 560;
 }

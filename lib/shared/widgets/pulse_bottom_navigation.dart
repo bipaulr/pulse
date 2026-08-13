@@ -42,7 +42,17 @@ class PulseBottomNavigation extends StatelessWidget {
         PulseSpacing.screenGutter,
         bottomInset > 0 ? bottomInset * 0.5 + PulseSpacing.sm : PulseSpacing.lg,
       ),
-      child: Container(
+      // Matches the content column, so on a wide window the bar sits under the
+      // content instead of stretching the whole viewport. No effect on phones.
+      // heightFactor pins the height to the bar itself; without it Center
+      // fills the loose height the Scaffold offers and the bar floats.
+      child: Center(
+        heightFactor: 1,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: PulseSpacing.maxContentWidth,
+          ),
+          child: Container(
         height: _barHeight,
         padding: const EdgeInsets.symmetric(horizontal: PulseSpacing.sm),
         decoration: BoxDecoration(
@@ -72,7 +82,9 @@ class PulseBottomNavigation extends StatelessWidget {
                   selected: false,
                   onTap: () => onDestinationSelected(i),
                 ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );
