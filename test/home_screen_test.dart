@@ -1,0 +1,200 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:pulse/app.dart';
+import 'package:pulse/core/theme/pulse_theme.dart';
+import 'package:pulse/features/home/data/home_repository.dart';
+import 'package:pulse/shared/models/models.dart';
+import 'package:pulse/shared/widgets/pulse_payment_card.dart';
+
+/// A clock the mock data is pinned to, so relative timestamps are stable.
+final _now = DateTime(2026, 8, 13, 15, 30);
+
+/// Pulse is a phone app, so tests run on a phone-shaped surface rather than
+/// the 800x600 default — on which the aspect-ratio'd card would be enormous.
+const _phone = Size(390, 844);
+
+Future<void> pumpHome(WidgetTester tester, {Size size = _phone}) async {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        homeRepositoryProvider.overrideWithValue(MockHomeRepository(now: _now)),
+      ],
+      child: const PulseApp(),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  group('Home screen', () {
+    testWidgets('shows the greeting, balance and trend', (tester) async {
+      await pumpHome(tester);
+
+      expect(find.text('Hi, Aarav'), findsOneWidget);
+      expect(find.text('Total Balance'), findsOneWidget);
+      expect(find.text('₹42,850.00'), findsOneWidget);
+      expect(find.text('+12.4% this month'), findsOneWidget);
+    });
+
+    testWidgets('renders the payment card with masked details', (tester) async {
+      await pumpHome(tester);
+
+      expect(find.byType(PulsePaymentCard), findsOneWidget);
+      expect(find.text('Pulse'), findsOneWidget);
+      expect(find.text('VIRTUAL DEBIT'), findsOneWidget);
+      expect(find.text('••••  ••••  ••••  4921'), findsOneWidget);
+      expect(find.text('Aarav Sharma'), findsOneWidget);
+      expect(find.text('02/28'), findsOneWidget);
+    });
+
+    testWidgets('shows all four quick actions', (tester) async {
+      await pumpHome(tester);
+
+      for (final label in ['Deposit', 'Transfer', 'Withdraw', 'More']) {
+        expect(find.text(label), findsOneWidget);
+      }
+    });
+
+    testWidgets('quick actions admit they do nothing yet', (tester) async {
+      await pumpHome(tester);
+
+      await tester.tap(find.text('Deposit'));
+      await tester.pump();
+
+      expect(find.text('Deposit is coming soon'), findsOneWidget);
+    });
+
+    testWidgets('lists the recent transactions', (tester) async {
+      await pumpHome(tester);
+
+      // Scroll the section fully into view before asserting on its rows.
+      await tester.drag(find.byType(ListView), const Offset(0, -600));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Swiggy'), findsOneWidget);
+      expect(find.text('Amazon'), findsOneWidget);
+      expect(find.text('Uber'), findsOneWidget);
+      expect(find.text('Netflix'), findsOneWidget);
+      expect(find.text('Salary'), findsOneWidget);
+
+      // Whole amounts drop the decimals; income is signed positive.
+      expect(find.text('- ₹420'), findsOneWidget);
+      expect(find.text('- ₹1,299'), findsOneWidget);
+      expect(find.text('+ ₹45,000'), findsOneWidget);
+    });
+
+    testWidgets('tints income green and leaves spend neutral', (tester) async {
+      await pumpHome(tester);
+      await tester.drag(find.byType(ListView), const Offset(0, -600));
+      await tester.pumpAndSettle();
+
+      final income = tester.widget<Text>(find.text('+ ₹45,000'));
+      final spend = tester.widget<Text>(find.text('- ₹420'));
+
+      expect(income.style?.color, PulseColors.light.positive);
+      expect(spend.style?.color, PulseColors.light.textPrimary);
+    });
+
+    testWidgets('View All opens the transactions tab', (tester) async {
+      await pumpHome(tester);
+      await tester.drag(find.byType(ListView), const Offset(0, -400));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('View All'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Transactions'), findsWidgets);
+      expect(find.text('Every movement across your cards'), findsOneWidget);
+    });
+
+    testWidgets('lays out without overflow across phone sizes', (tester) async {
+      for (final size in const [
+        Size(320, 640), // narrow, small
+        Size(360, 800), // common budget Android
+        Size(412, 915), // Pixel-class
+      ]) {
+        await pumpHome(tester, size: size);
+        await tester.drag(find.byType(ListView), const Offset(0, -800));
+        await tester.pumpAndSettle();
+
+        expect(
+          tester.takeException(),
+          isNull,
+          reason: 'overflowed at ${size.width}x${size.height}',
+        );
+      }
+    });
+  });
+
+  group('models', () {
+    test('balance summary formats its trend', () {
+      expect(
+        const BalanceSummary(total: 1, changePercent: 12.4).changeLabel,
+        '+12.4% this month',
+      );
+      expect(
+        const BalanceSummary(total: 1, changePercent: -3).changeLabel,
+        '−3.0% this month',
+      );
+    });
+
+    test('transactions collapse whole amounts to zero decimals', () {
+      PulseTransaction at(double amount) => PulseTransaction(
+        id: 'x',
+        merchant: 'm',
+        category: TransactionCategory.food,
+        amount: amount,
+        occurredAt: _now,
+        cardId: 'card_lime',
+      );
+
+      expect(at(-420).displayDecimals, 0);
+      expect(at(-420.5).displayDecimals, 2);
+      expect(at(45000).isIncome, isTrue);
+      expect(at(-1).isIncome, isFalse);
+    });
+
+    test('timestamps stay short', () {
+      PulseTransaction at(DateTime when) => PulseTransaction(
+        id: 'x',
+        merchant: 'm',
+        category: TransactionCategory.food,
+        amount: -1,
+        occurredAt: when,
+        cardId: 'card_lime',
+      );
+
+      expect(at(DateTime(2026, 8, 13, 13, 12)).shortWhenLabel(_now), '1:12 PM');
+      expect(at(DateTime(2026, 8, 13, 9, 5)).shortWhenLabel(_now), '9:05 AM');
+      expect(at(DateTime(2026, 8, 13, 0, 30)).shortWhenLabel(_now), '12:30 AM');
+      expect(at(DateTime(2026, 8, 12, 18)).shortWhenLabel(_now), 'Yesterday');
+      expect(at(DateTime(2026, 8, 9, 18)).shortWhenLabel(_now), '9 Aug');
+    });
+
+    test('card exposes only the last four digits', () {
+      const card = PaymentCard(
+        id: 'c',
+        holderName: 'Aarav Sharma',
+        last4: '4921',
+        expiry: '02/28',
+        availableBalance: 42850,
+      );
+      expect(card.maskedNumber, '••••  ••••  ••••  4921');
+    });
+
+    test('profile derives initials', () {
+      const user = UserProfile(firstName: 'Aarav', lastName: 'Sharma');
+      expect(user.initials, 'AS');
+      expect(user.fullName, 'Aarav Sharma');
+      expect(
+        const UserProfile(firstName: '', lastName: '').initials,
+        isEmpty,
+      );
+    });
+  });
+}
