@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pulse/app.dart';
 import 'package:pulse/core/routing/app_shell.dart';
+
+import 'support/pump_app.dart';
 
 void main() {
   testWidgets('boots into Home with the Pulse navigation bar', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: PulseApp()));
-    await tester.pumpAndSettle();
+    await pumpPulseApp(tester);
 
     expect(find.byType(AppShell), findsOneWidget);
     expect(find.text('Home'), findsWidgets);
@@ -15,8 +14,7 @@ void main() {
   });
 
   testWidgets('switches tabs through the bottom navigation', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: PulseApp()));
-    await tester.pumpAndSettle();
+    await pumpPulseApp(tester);
 
     await tester.tap(find.byIcon(Icons.credit_card_rounded));
     await tester.pumpAndSettle();

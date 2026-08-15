@@ -9,10 +9,19 @@ import '../../../shared/widgets/widgets.dart';
 /// Deliberately light: the balance below it is the screen's headline, so the
 /// header stays at heading rather than display weight.
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({super.key, required this.user, this.onNotificationsTap});
+  const HomeHeader({
+    super.key,
+    required this.user,
+    this.onNotificationsTap,
+    this.onAvatarTap,
+  });
 
   final UserProfile user;
   final VoidCallback? onNotificationsTap;
+
+  /// Opens the profile sheet — the avatar is the one existing element that
+  /// can carry this without adding any new chrome to the header.
+  final VoidCallback? onAvatarTap;
 
   static String greetingFor(DateTime now) {
     if (now.hour < 12) return 'Good morning';
@@ -30,17 +39,27 @@ class HomeHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            height: 46,
-            width: 46,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.accent,
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              user.initials,
-              style: PulseTypography.labelSm.copyWith(color: colors.onAccent),
+          Semantics(
+            button: onAvatarTap != null,
+            label: 'Profile',
+            child: GestureDetector(
+              onTap: onAvatarTap,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 46,
+                width: 46,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.accent,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  user.initials,
+                  style: PulseTypography.labelSm.copyWith(
+                    color: colors.onAccent,
+                  ),
+                ),
+              ),
             ),
           ),
           const SizedBox(width: PulseSpacing.md),

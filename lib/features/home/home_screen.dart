@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/routing/app_routes.dart';
 import '../../core/theme/pulse_theme.dart';
+import '../../shared/models/models.dart';
 import '../../shared/widgets/widgets.dart';
+import '../auth/data/auth_controller.dart';
 import 'data/home_repository.dart';
 import 'widgets/balance_summary_view.dart';
 import 'widgets/home_header.dart';
@@ -37,6 +39,7 @@ class HomeScreen extends ConsumerWidget {
               child: HomeHeader(
                 user: snapshot.user,
                 onNotificationsTap: () => _notImplemented(context, 'Alerts'),
+                onAvatarTap: () => _showProfileSheet(context, ref, snapshot.user),
               ),
             ),
             const SizedBox(height: PulseSpacing.sectionGap),
@@ -97,6 +100,92 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// The one place Logout lives — tapping the existing avatar, so nothing new
+  /// is added to the header itself.
+  void _showProfileSheet(BuildContext context, WidgetRef ref, UserProfile user) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) {
+        final colors = sheetContext.pulseColors;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              PulseSpacing.screenGutter,
+              PulseSpacing.xl,
+              PulseSpacing.screenGutter,
+              PulseSpacing.xl,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    height: 4,
+                    width: 44,
+                    decoration: BoxDecoration(
+                      color: colors.border,
+                      borderRadius: PulseRadii.chipRadius,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: PulseSpacing.xl),
+                Row(
+                  children: [
+                    Container(
+                      height: 52,
+                      width: 52,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: colors.accent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        user.initials,
+                        style: PulseTypography.titleSm.copyWith(
+                          color: colors.onAccent,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: PulseSpacing.md),
+                    Expanded(
+                      child: Text(
+                        user.fullName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: PulseTypography.headingMd.copyWith(
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: PulseSpacing.xxl),
+                PulseButton(
+                  label: 'Log Out',
+                  variant: PulseButtonVariant.dark,
+                  icon: Icons.logout_rounded,
+                  expand: true,
+                  onPressed: () async {
+                    Navigator.of(sheetContext).pop();
+                    await ref.read(authControllerProvider.notifier).logout();
+                  },
+                ),
+                const SizedBox(height: PulseSpacing.sm),
+                PulseButton(
+                  label: 'Cancel',
+                  variant: PulseButtonVariant.outline,
+                  expand: true,
+                  onPressed: () => Navigator.of(sheetContext).pop(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

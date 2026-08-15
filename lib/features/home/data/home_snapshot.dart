@@ -20,4 +20,11 @@ class HomeSnapshot {
   final BalanceSummary balance;
   final PaymentCard card;
   final List<PulseTransaction> recentTransactions;
+
+  HomeSnapshot copyWith({UserProfile? user}) => HomeSnapshot(
+    user: user ?? this.user,
+    balance: balance,
+    card: card,
+    recentTransactions: recentTransactions,
+  );
 }

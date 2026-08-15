@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pulse/core/routing/app_routes.dart';
 import 'package:pulse/core/theme/pulse_theme.dart';
 import 'package:pulse/shared/models/models.dart';
 import 'package:pulse/shared/widgets/pulse_payment_card.dart';
@@ -111,6 +113,68 @@ void main() {
         );
       }
     });
+  });
+
+  group('Logout', () {
+    testWidgets('the avatar opens a profile sheet with the signed-in name', (
+      tester,
+    ) async {
+      await pumpHome(tester);
+
+      await tester.tap(find.text('AS'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Aarav Sharma'), findsWidgets);
+      expect(find.text('Log Out'), findsOneWidget);
+    });
+
+    testWidgets('Cancel dismisses the sheet without logging out', (
+      tester,
+    ) async {
+      await pumpHome(tester);
+      await tester.tap(find.text('AS'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Log Out'), findsNothing);
+      expect(find.text('Hi, Aarav'), findsOneWidget);
+    });
+
+    testWidgets('Log Out clears the session and returns to Login', (
+      tester,
+    ) async {
+      await pumpHome(tester);
+      await tester.tap(find.text('AS'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Log Out'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Welcome back'), findsOneWidget);
+    });
+
+    testWidgets(
+      'after logging out, a protected route is no longer reachable',
+      (tester) async {
+        await pumpHome(tester);
+        await tester.tap(find.text('AS'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Log Out'));
+        await tester.pumpAndSettle();
+        expect(find.text('Welcome back'), findsOneWidget);
+
+        // Simulates a stale deep link or a typed URL to a protected tab,
+        // in the same session that just logged out.
+        final router = GoRouter.of(tester.element(find.byType(Navigator).first));
+        router.go(AppRoutes.cards);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Welcome back'), findsOneWidget);
+        expect(find.text('My Cards'), findsNothing);
+      },
+    );
   });
 
   group('models', () {

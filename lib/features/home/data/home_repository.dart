@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/clock.dart';
 import '../../../shared/data/mock_dataset.dart';
+import '../../auth/data/auth_controller.dart';
 import 'home_snapshot.dart';
 
 /// Source of the Home screen's data.
@@ -38,6 +39,13 @@ final homeRepositoryProvider = Provider<HomeRepository>(
 /// call it turns into a `FutureProvider` and the screen switches to
 /// `AsyncValue.when` — `PulseSkeleton` and `PulseErrorState` already exist for
 /// the other two branches.
-final homeSnapshotProvider = Provider<HomeSnapshot>(
-  (ref) => ref.watch(homeRepositoryProvider).load(),
-);
+///
+/// The mock dataset's user is overlaid with whoever actually signed in, so a
+/// freshly signed-up name shows up in the greeting instead of always reading
+/// "Aarav" — the two are only guaranteed to match for the demo account.
+final homeSnapshotProvider = Provider<HomeSnapshot>((ref) {
+  final snapshot = ref.watch(homeRepositoryProvider).load();
+  final signedInUser = ref.watch(authControllerProvider).user;
+  if (signedInUser == null) return snapshot;
+  return snapshot.copyWith(user: signedInUser);
+});
