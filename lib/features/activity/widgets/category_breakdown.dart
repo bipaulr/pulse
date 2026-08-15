@@ -53,17 +53,20 @@ class CategoryBreakdown extends ConsumerWidget {
         else
           SizedBox(
             height: _rowHeight,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: PulseSpacing.screenGutter,
-              ),
-              itemCount: categories.length,
-              separatorBuilder: (_, _) => const SizedBox(width: PulseSpacing.md),
-              itemBuilder: (context, index) => _CategoryCard(
-                spend: categories[index],
-                currencySymbol: summary.currencySymbol,
-                width: _cardWidth,
+            child: PulseHorizontalFade(
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: PulseSpacing.screenGutter,
+                ),
+                itemCount: categories.length,
+                separatorBuilder: (_, _) =>
+                    const SizedBox(width: PulseSpacing.md),
+                itemBuilder: (context, index) => _CategoryCard(
+                  spend: categories[index],
+                  currencySymbol: summary.currencySymbol,
+                  width: _cardWidth,
+                ),
               ),
             ),
           ),

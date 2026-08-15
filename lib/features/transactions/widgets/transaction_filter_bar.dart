@@ -20,25 +20,27 @@ class TransactionFilterBar extends ConsumerWidget {
 
     return SizedBox(
       height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: PulseSpacing.screenGutter,
+      child: PulseHorizontalFade(
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(
+            horizontal: PulseSpacing.screenGutter,
+          ),
+          itemCount: TransactionFilter.values.length,
+          separatorBuilder: (_, _) => const SizedBox(width: PulseSpacing.sm),
+          itemBuilder: (context, index) {
+            final filter = TransactionFilter.values[index];
+            return Center(
+              child: PulseChip(
+                label: filter.label,
+                selected: filter == selected,
+                onTap: () => ref
+                    .read(transactionQueryProvider.notifier)
+                    .setFilter(filter),
+              ),
+            );
+          },
         ),
-        itemCount: TransactionFilter.values.length,
-        separatorBuilder: (_, _) => const SizedBox(width: PulseSpacing.sm),
-        itemBuilder: (context, index) {
-          final filter = TransactionFilter.values[index];
-          return Center(
-            child: PulseChip(
-              label: filter.label,
-              selected: filter == selected,
-              onTap: () => ref
-                  .read(transactionQueryProvider.notifier)
-                  .setFilter(filter),
-            ),
-          );
-        },
       ),
     );
   }

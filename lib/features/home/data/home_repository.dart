@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/clock.dart';
 import '../../../shared/data/mock_dataset.dart';
 import 'home_snapshot.dart';
 
@@ -28,7 +29,7 @@ class MockHomeRepository implements HomeRepository {
 }
 
 final homeRepositoryProvider = Provider<HomeRepository>(
-  (ref) => MockHomeRepository(),
+  (ref) => MockHomeRepository(now: ref.watch(nowProvider)()),
 );
 
 /// The Home screen's data.

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/clock.dart';
 import '../../../shared/data/mock_dataset.dart';
 import '../../../shared/models/models.dart';
 
@@ -22,7 +23,7 @@ class MockTransactionsRepository implements TransactionsRepository {
 }
 
 final transactionsRepositoryProvider = Provider<TransactionsRepository>(
-  (ref) => MockTransactionsRepository(),
+  (ref) => MockTransactionsRepository(now: ref.watch(nowProvider)()),
 );
 
 /// Every transaction, newest first.

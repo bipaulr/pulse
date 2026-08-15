@@ -12,6 +12,7 @@ export 'pulse_detail_row.dart';
 export 'pulse_empty_state.dart';
 export 'pulse_error_state.dart';
 export 'pulse_fade_in.dart';
+export 'pulse_horizontal_fade.dart';
 export 'pulse_icon_button.dart';
 export 'pulse_payment_card.dart';
 export 'pulse_section_header.dart';

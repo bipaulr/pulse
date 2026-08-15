@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/clock.dart';
 import '../../transactions/data/transactions_repository.dart';
 import 'activity_analytics.dart';
 import 'activity_models.dart';
@@ -56,6 +57,7 @@ final categoryDirectionProvider =
 final activitySummaryProvider = Provider<AsyncValue<ActivitySummary>>((ref) {
   final period = ref.watch(activityPeriodProvider);
   final direction = ref.watch(categoryDirectionProvider);
+  final now = ref.watch(nowProvider)();
 
   return ref
       .watch(allTransactionsProvider)
@@ -63,7 +65,7 @@ final activitySummaryProvider = Provider<AsyncValue<ActivitySummary>>((ref) {
         (transactions) => ActivityAnalytics.summarize(
           transactions: transactions,
           period: period,
-          now: DateTime.now(),
+          now: now,
           direction: direction,
         ),
       );

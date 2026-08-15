@@ -46,3 +46,7 @@ app.*.map.json
 
 # Local tool configuration — machine-specific paths, not shared
 .claude/settings.local.json
+
+# Diff images golden tests write on failure — regenerated locally, never
+# meant to be committed
+/test/failures/

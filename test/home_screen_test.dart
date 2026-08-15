@@ -1,34 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pulse/app.dart';
 import 'package:pulse/core/theme/pulse_theme.dart';
-import 'package:pulse/features/home/data/home_repository.dart';
 import 'package:pulse/shared/models/models.dart';
 import 'package:pulse/shared/widgets/pulse_payment_card.dart';
 
-/// A clock the mock data is pinned to, so relative timestamps are stable.
-final _now = DateTime(2026, 8, 13, 15, 30);
+import 'support/pump_app.dart';
 
-/// Pulse is a phone app, so tests run on a phone-shaped surface rather than
-/// the 800x600 default — on which the aspect-ratio'd card would be enormous.
-const _phone = Size(390, 844);
+/// The clock the sample data is pinned to.
+final _now = testNow;
 
-Future<void> pumpHome(WidgetTester tester, {Size size = _phone}) async {
-  tester.view.physicalSize = size;
-  tester.view.devicePixelRatio = 1.0;
-  addTearDown(tester.view.reset);
-
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        homeRepositoryProvider.overrideWithValue(MockHomeRepository(now: _now)),
-      ],
-      child: const PulseApp(),
-    ),
-  );
-  await tester.pumpAndSettle();
-}
+Future<void> pumpHome(WidgetTester tester, {Size size = phoneSize}) =>
+    pumpPulseApp(tester, size: size);
 
 void main() {
   group('Home screen', () {

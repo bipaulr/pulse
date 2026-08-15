@@ -34,7 +34,18 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.pulseColors.background,
       extendBody: true,
-      body: navigationShell,
+      // Pulse is a phone design. On a wide window every screen centres in one
+      // column instead of stretching — without this the aspect-ratio'd payment
+      // cards grow to several hundred pixels tall and list rows strand their
+      // amounts at the far edge. No effect below the threshold.
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: PulseSpacing.maxContentWidth,
+          ),
+          child: navigationShell,
+        ),
+      ),
       bottomNavigationBar: PulseBottomNavigation(
         destinations: destinations,
         currentIndex: navigationShell.currentIndex,

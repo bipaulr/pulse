@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/clock.dart';
 import '../../../shared/models/models.dart';
 import 'transactions_repository.dart';
 
@@ -151,7 +152,10 @@ String dayLabel(DateTime day, DateTime today) {
 
 final transactionFeedProvider =
     Provider<AsyncValue<List<TransactionFeedItem>>>((ref) {
+      // Same clock the sample data was generated against, so "Today" means the
+      // same day in both places.
+      final now = ref.watch(nowProvider)();
       return ref
           .watch(visibleTransactionsProvider)
-          .whenData((list) => buildTransactionFeed(list, DateTime.now()));
+          .whenData((list) => buildTransactionFeed(list, now));
     });

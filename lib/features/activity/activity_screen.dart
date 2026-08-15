@@ -18,10 +18,6 @@ import 'widgets/spending_overview.dart';
 class ActivityScreen extends ConsumerWidget {
   const ActivityScreen({super.key});
 
-  /// On a wide window the content is centred in a phone-ish column rather than
-  /// stretched, so the chart and cards keep their intended proportions.
-  static const maxContentWidth = PulseSpacing.maxContentWidth;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.pulseColors;
@@ -29,20 +25,16 @@ class ActivityScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: colors.background,
+      // The width constraint lives in AppShell now, so every screen shares it.
       body: SafeArea(
         bottom: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: maxContentWidth),
-            child: summary.when(
-              loading: () => const _ActivitySkeleton(),
-              error: (error, _) => PulseErrorState(
-                title: 'Could not load your activity',
-                onRetry: () => ref.invalidate(allTransactionsProvider),
-              ),
-              data: (data) => _ActivityBody(summary: data),
-            ),
+        child: summary.when(
+          loading: () => const _ActivitySkeleton(),
+          error: (error, _) => PulseErrorState(
+            title: 'Could not load your activity',
+            onRetry: () => ref.invalidate(allTransactionsProvider),
           ),
+          data: (data) => _ActivityBody(summary: data),
         ),
       ),
     );

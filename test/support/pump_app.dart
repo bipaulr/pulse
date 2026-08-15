@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pulse/app.dart';
-import 'package:pulse/features/home/data/home_repository.dart';
-import 'package:pulse/features/transactions/data/transactions_repository.dart';
+import 'package:pulse/core/clock.dart';
 
 /// A clock the mock data is pinned to, so relative timestamps are stable.
 final testNow = DateTime(2026, 8, 13, 15, 30);
@@ -26,14 +25,9 @@ Future<void> pumpPulseApp(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [
-        homeRepositoryProvider.overrideWithValue(
-          MockHomeRepository(now: testNow),
-        ),
-        transactionsRepositoryProvider.overrideWithValue(
-          MockTransactionsRepository(now: testNow),
-        ),
-      ],
+      // One clock override pins the sample data *and* the grouping, so day
+      // labels like "Today" cannot drift apart as the real date moves on.
+      overrides: [nowProvider.overrideWithValue(() => testNow)],
       child: const PulseApp(),
     ),
   );
