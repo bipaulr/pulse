@@ -66,7 +66,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isAuthenticating = auth.status == AuthStatus.authenticating;
 
     return AuthScaffold(
-      child: Column(
+      child: PulseFadeIn(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const PulseBrandMark(),
@@ -198,6 +199,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ],
           ),
         ],
+        ),
       ),
     );
   }

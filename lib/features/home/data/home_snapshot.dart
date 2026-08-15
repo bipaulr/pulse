@@ -21,10 +21,11 @@ class HomeSnapshot {
   final PaymentCard card;
   final List<PulseTransaction> recentTransactions;
 
-  HomeSnapshot copyWith({UserProfile? user}) => HomeSnapshot(
-    user: user ?? this.user,
-    balance: balance,
-    card: card,
-    recentTransactions: recentTransactions,
-  );
+  HomeSnapshot copyWith({UserProfile? user, PaymentCard? card}) =>
+      HomeSnapshot(
+        user: user ?? this.user,
+        balance: balance,
+        card: card ?? this.card,
+        recentTransactions: recentTransactions,
+      );
 }

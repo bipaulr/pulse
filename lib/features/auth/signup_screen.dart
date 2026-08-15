@@ -89,7 +89,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     return AuthScaffold(
       onBack: () => context.go(AppRoutes.login),
-      child: Column(
+      child: PulseFadeIn(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const PulseBrandMark(),
@@ -185,6 +186,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             ],
           ),
         ],
+        ),
       ),
     );
   }

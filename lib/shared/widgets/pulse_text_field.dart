@@ -70,7 +70,9 @@ class _PulseTextFieldState extends State<PulseTextField> {
           style: PulseTypography.metadata.copyWith(color: colors.textSecondary),
         ),
         const SizedBox(height: PulseSpacing.sm),
-        Container(
+        AnimatedContainer(
+          duration: PulseMotion.standard,
+          curve: PulseMotion.curve,
           height: 52,
           padding: const EdgeInsets.symmetric(horizontal: PulseSpacing.lg),
           decoration: BoxDecoration(
@@ -131,15 +133,29 @@ class _PulseTextFieldState extends State<PulseTextField> {
             ],
           ),
         ),
-        // Reserves no space when there is nothing to say, so a field without
-        // an error doesn't sit with a permanent gap beneath it.
-        if (hasError) ...[
-          const SizedBox(height: PulseSpacing.xs),
-          Text(
-            widget.errorText!,
-            style: PulseTypography.caption.copyWith(color: colors.negative),
+        // Expands/fades into place rather than shoving the rest of the form
+        // down in a single frame; collapses the same way when the error
+        // clears, reserving no space when there's nothing to say.
+        AnimatedSize(
+          duration: PulseMotion.standard,
+          curve: PulseMotion.curve,
+          alignment: Alignment.topCenter,
+          child: AnimatedOpacity(
+            duration: PulseMotion.standard,
+            opacity: hasError ? 1 : 0,
+            child: hasError
+                ? Padding(
+                    padding: const EdgeInsets.only(top: PulseSpacing.xs),
+                    child: Text(
+                      widget.errorText!,
+                      style: PulseTypography.caption.copyWith(
+                        color: colors.negative,
+                      ),
+                    ),
+                  )
+                : const SizedBox(width: double.infinity),
           ),
-        ],
+        ),
       ],
     );
   }

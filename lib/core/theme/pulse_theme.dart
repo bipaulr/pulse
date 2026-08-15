@@ -7,6 +7,7 @@ import 'pulse_spacing.dart';
 import 'pulse_typography.dart';
 
 export 'pulse_colors.dart';
+export 'pulse_motion.dart';
 export 'pulse_radii.dart';
 export 'pulse_shadows.dart';
 export 'pulse_shapes.dart';

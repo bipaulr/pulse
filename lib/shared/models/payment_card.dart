@@ -52,6 +52,21 @@ class PaymentCard {
   /// Display form: three masked groups plus the real last four.
   String get maskedNumber => '••••  ••••  ••••  $last4';
 
+  /// Used to overlay the signed-in user's name onto mock cards — the card
+  /// itself (number, balance, network, ...) stays untouched; only the printed
+  /// holder name follows whoever is actually logged in.
+  PaymentCard copyWith({String? holderName}) => PaymentCard(
+    id: id,
+    holderName: holderName ?? this.holderName,
+    last4: last4,
+    expiry: expiry,
+    availableBalance: availableBalance,
+    productName: productName,
+    network: network,
+    style: style,
+    currencySymbol: currencySymbol,
+  );
+
   /// How this card names itself inside a transaction record.
   String get paymentMethodLabel => 'Pulse $productName •••• $last4';
 

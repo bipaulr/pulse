@@ -102,12 +102,12 @@ class PulseChip extends StatelessWidget {
             const SizedBox(width: PulseSpacing.xs + 2),
           ],
           Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: AnimatedDefaultTextStyle(
+              duration: PulseMotion.standard,
+              curve: PulseMotion.curve,
               style: (dense ? PulseTypography.caption : PulseTypography.labelSm)
                   .copyWith(color: foreground),
+              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           ),
           if (trailingIcon != null) ...[
@@ -118,13 +118,20 @@ class PulseChip extends StatelessWidget {
       ),
     );
 
-    return Material(
-      color: background,
-      shape: shape,
-      clipBehavior: Clip.antiAlias,
-      child: onTap == null
-          ? content
-          : InkWell(onTap: onTap, customBorder: shape, child: content),
+    // The colour swap on selection (e.g. a filter chip being tapped) fades
+    // rather than snaps; ripple feedback still lives on the InkWell beneath.
+    return AnimatedContainer(
+      duration: PulseMotion.standard,
+      curve: PulseMotion.curve,
+      decoration: ShapeDecoration(color: background, shape: shape),
+      child: Material(
+        color: Colors.transparent,
+        shape: shape,
+        clipBehavior: Clip.antiAlias,
+        child: onTap == null
+            ? content
+            : InkWell(onTap: onTap, customBorder: shape, child: content),
+      ),
     );
   }
 }

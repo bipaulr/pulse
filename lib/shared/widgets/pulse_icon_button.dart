@@ -11,8 +11,10 @@ enum PulseIconButtonSize { small, medium, large }
 /// A compact, self-contained icon action.
 ///
 /// Used for the small circular controls that sit in card notches, app bars and
-/// quick-action rows throughout Pulse.
-class PulseIconButton extends StatelessWidget {
+/// quick-action rows throughout Pulse. Press feedback is a small scale, the
+/// same technique [PulseButton] and the payment card use — kept consistent
+/// rather than mixing in a Material ripple here and scale everywhere else.
+class PulseIconButton extends StatefulWidget {
   const PulseIconButton({
     super.key,
     required this.icon,
@@ -30,24 +32,36 @@ class PulseIconButton extends StatelessWidget {
   final PulseIconButtonSize size;
   final String? tooltip;
 
-  double get _extent => switch (size) {
+  @override
+  State<PulseIconButton> createState() => _PulseIconButtonState();
+}
+
+class _PulseIconButtonState extends State<PulseIconButton> {
+  bool _pressed = false;
+
+  double get _extent => switch (widget.size) {
     PulseIconButtonSize.small => 36,
     PulseIconButtonSize.medium => 44,
     PulseIconButtonSize.large => 54,
   };
 
-  double get _iconSize => switch (size) {
+  double get _iconSize => switch (widget.size) {
     PulseIconButtonSize.small => 16,
     PulseIconButtonSize.medium => 20,
     PulseIconButtonSize.large => 24,
   };
+
+  void _setPressed(bool value) {
+    if (widget.onPressed == null) return;
+    if (_pressed != value) setState(() => _pressed = value);
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.pulseColors;
 
     final (Color background, Color foreground, BorderSide side) =
-        switch (tone) {
+        switch (widget.tone) {
           PulseIconButtonTone.surface => (
             colors.surface,
             colors.textPrimary,
@@ -76,33 +90,36 @@ class PulseIconButton extends StatelessWidget {
         };
 
     final borderShape = RoundedRectangleBorder(
-      borderRadius: shape == PulseIconButtonShape.circle
+      borderRadius: widget.shape == PulseIconButtonShape.circle
           ? PulseRadii.chipRadius
           : PulseRadii.iconRadius,
       side: side,
     );
 
-    Widget button = SizedBox(
-      width: _extent,
-      height: _extent,
-      child: Material(
-        color: background,
-        shape: borderShape,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onPressed,
-          customBorder: borderShape,
-          child: Center(
-            child: Icon(icon, size: _iconSize, color: foreground),
-          ),
+    Widget button = GestureDetector(
+      onTapDown: (_) => _setPressed(true),
+      onTapCancel: () => _setPressed(false),
+      onTapUp: (_) => _setPressed(false),
+      onTap: widget.onPressed,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedScale(
+        scale: _pressed ? 0.9 : 1.0,
+        duration: PulseMotion.fast,
+        curve: PulseMotion.curve,
+        child: Container(
+          width: _extent,
+          height: _extent,
+          alignment: Alignment.center,
+          decoration: ShapeDecoration(color: background, shape: borderShape),
+          child: Icon(widget.icon, size: _iconSize, color: foreground),
         ),
       ),
     );
 
-    if (tooltip != null) {
-      button = Tooltip(message: tooltip!, child: button);
+    if (widget.tooltip != null) {
+      button = Tooltip(message: widget.tooltip!, child: button);
     }
 
-    return Semantics(button: true, label: tooltip, child: button);
+    return Semantics(button: true, label: widget.tooltip, child: button);
   }
 }

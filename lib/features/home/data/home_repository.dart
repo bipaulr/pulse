@@ -40,12 +40,18 @@ final homeRepositoryProvider = Provider<HomeRepository>(
 /// `AsyncValue.when` — `PulseSkeleton` and `PulseErrorState` already exist for
 /// the other two branches.
 ///
-/// The mock dataset's user is overlaid with whoever actually signed in, so a
-/// freshly signed-up name shows up in the greeting instead of always reading
-/// "Aarav" — the two are only guaranteed to match for the demo account.
+/// The mock dataset's user and card holder name are overlaid with whoever
+/// actually signed in, so a freshly signed-up identity shows up consistently
+/// in the greeting *and* on the card face — the two are only guaranteed to
+/// match the underlying mock data for the demo account. Balances,
+/// transactions and merchant data are never touched by this: those are fixed
+/// demo financial data, not identity.
 final homeSnapshotProvider = Provider<HomeSnapshot>((ref) {
   final snapshot = ref.watch(homeRepositoryProvider).load();
   final signedInUser = ref.watch(authControllerProvider).user;
   if (signedInUser == null) return snapshot;
-  return snapshot.copyWith(user: signedInUser);
+  return snapshot.copyWith(
+    user: signedInUser,
+    card: snapshot.card.copyWith(holderName: signedInUser.fullName),
+  );
 });

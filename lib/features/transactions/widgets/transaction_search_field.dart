@@ -27,10 +27,24 @@ class _TransactionSearchFieldState
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   Timer? _debounce;
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  void _handleFocusChange() {
+    if (_focused != _focusNode.hasFocus) {
+      setState(() => _focused = _focusNode.hasFocus);
+    }
+  }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _focusNode.removeListener(_handleFocusChange);
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -64,20 +78,31 @@ class _TransactionSearchFieldState
       padding: const EdgeInsets.symmetric(
         horizontal: PulseSpacing.screenGutter,
       ),
-      child: Container(
+      child: AnimatedContainer(
+        duration: PulseMotion.standard,
+        curve: PulseMotion.curve,
         height: 52,
         padding: const EdgeInsets.symmetric(horizontal: PulseSpacing.lg),
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: PulseRadii.chipRadius,
-          border: Border.all(color: colors.border),
+          border: Border.all(
+            color: _focused ? colors.textPrimary : colors.border,
+            width: _focused ? 1.5 : 1,
+          ),
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.search_rounded,
-              size: 20,
-              color: colors.textSecondary,
+            // Icon has no implicit colour animation of its own, so this is
+            // tweened by hand rather than left to snap between states.
+            TweenAnimationBuilder<Color?>(
+              tween: ColorTween(
+                end: _focused ? colors.textPrimary : colors.textSecondary,
+              ),
+              duration: PulseMotion.standard,
+              curve: PulseMotion.curve,
+              builder: (context, color, _) =>
+                  Icon(Icons.search_rounded, size: 20, color: color),
             ),
             const SizedBox(width: PulseSpacing.md),
             Expanded(

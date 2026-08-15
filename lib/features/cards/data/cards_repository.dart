@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/data/mock_dataset.dart';
 import '../../../shared/models/models.dart';
+import '../../auth/data/auth_controller.dart';
 
 /// Source of the user's cards.
 ///
@@ -35,9 +36,20 @@ final cardsRepositoryProvider = Provider<CardsRepository>(
   (ref) => const MockCardsRepository(),
 );
 
-final cardsProvider = FutureProvider<List<PaymentCard>>(
-  (ref) => ref.watch(cardsRepositoryProvider).fetchCards(),
-);
+/// The wallet's cards, with every holder name overlaid to match whoever is
+/// actually signed in.
+///
+/// Only the printed name changes — numbers, balances, network and style stay
+/// exactly as the mock data defines them, the same rule Home's snapshot
+/// follows for its own card.
+final cardsProvider = FutureProvider<List<PaymentCard>>((ref) async {
+  final cards = await ref.watch(cardsRepositoryProvider).fetchCards();
+  final signedInUser = ref.watch(authControllerProvider).user;
+  if (signedInUser == null) return cards;
+  return [
+    for (final card in cards) card.copyWith(holderName: signedInUser.fullName),
+  ];
+});
 
 /// Which card the carousel is showing.
 class SelectedCardIndex extends Notifier<int> {

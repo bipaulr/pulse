@@ -70,16 +70,16 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
         onTapCancel: () => _setPressed(false),
         onTap: action.onTap,
         child: AnimatedScale(
-          scale: _pressed ? 0.93 : 1,
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOut,
+          scale: _pressed ? 0.96 : 1,
+          duration: PulseMotion.fast,
+          curve: PulseMotion.curve,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: PulseSpacing.sm),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
+                  duration: PulseMotion.fast,
                   height: 52,
                   width: 52,
                   decoration: BoxDecoration(

@@ -16,23 +16,34 @@ class TransactionFeedView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final feed = ref.watch(transactionFeedProvider);
+    // Part of the data branch's key, so a new search/filter combination gets
+    // its own transition instead of AnimatedSwitcher treating it as "the same
+    // child, just re-rendered" and skipping the animation entirely.
+    final query = ref.watch(transactionQueryProvider);
+    final queryKey = '${query.search}|${query.filter.name}';
 
-    return feed.when(
-      loading: () => const _FeedSkeleton(),
-      error: (error, _) => PulseErrorState(
-        title: 'Could not load transactions',
-        onRetry: () => ref.invalidate(allTransactionsProvider),
+    return AnimatedSwitcher(
+      duration: PulseMotion.standard,
+      child: feed.when(
+        loading: () => const _FeedSkeleton(key: ValueKey('loading')),
+        error: (error, _) => PulseErrorState(
+          key: const ValueKey('error'),
+          title: 'Could not load transactions',
+          onRetry: () => ref.invalidate(allTransactionsProvider),
+        ),
+        data: (items) {
+          if (items.isEmpty) {
+            return _FeedEmpty(key: ValueKey('empty-$queryKey'));
+          }
+          return _FeedList(key: ValueKey('data-$queryKey'), items: items);
+        },
       ),
-      data: (items) {
-        if (items.isEmpty) return const _FeedEmpty();
-        return _FeedList(items: items);
-      },
     );
   }
 }
 
 class _FeedList extends StatelessWidget {
-  const _FeedList({required this.items});
+  const _FeedList({super.key, required this.items});
 
   final List<TransactionFeedItem> items;
 
@@ -126,7 +137,7 @@ class _EntryRow extends StatelessWidget {
 
 /// Placeholder rows while the feed loads.
 class _FeedSkeleton extends StatelessWidget {
-  const _FeedSkeleton();
+  const _FeedSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +195,7 @@ class _SkeletonRow extends StatelessWidget {
 /// Distinguishes "you have no transactions" from "your search found nothing",
 /// because the way out of each is different.
 class _FeedEmpty extends ConsumerWidget {
-  const _FeedEmpty();
+  const _FeedEmpty({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

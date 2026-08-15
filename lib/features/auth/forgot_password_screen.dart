@@ -59,9 +59,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     return AuthScaffold(
       onBack: () => _backToLogin(context),
-      child: _sent
-          ? _ConfirmationView(onDone: () => _backToLogin(context))
-          : _buildForm(context),
+      // The confirmation replaces the form in place — a cross-fade reads as
+      // "the same screen settling into its result" rather than a jump-cut.
+      child: AnimatedSwitcher(
+        duration: PulseMotion.standard,
+        child: _sent
+            ? _ConfirmationView(
+                key: const ValueKey('sent'),
+                onDone: () => _backToLogin(context),
+              )
+            : KeyedSubtree(
+                key: const ValueKey('form'),
+                child: _buildForm(context),
+              ),
+      ),
     );
   }
 
@@ -121,7 +132,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 }
 
 class _ConfirmationView extends StatelessWidget {
-  const _ConfirmationView({required this.onDone});
+  const _ConfirmationView({super.key, required this.onDone});
 
   final VoidCallback onDone;
 

@@ -26,15 +26,21 @@ class CardsScreen extends ConsumerWidget {
       backgroundColor: colors.background,
       body: SafeArea(
         bottom: false,
-        child: cards.when(
-          loading: () => const _CardsSkeleton(),
-          error: (error, _) => PulseErrorState(
-            title: 'Could not load your cards',
-            onRetry: () => ref.invalidate(cardsProvider),
+        // Graceful even though the mock resolves instantly today — a real
+        // backend's latency shouldn't ever cause a hard content flash.
+        child: AnimatedSwitcher(
+          duration: PulseMotion.standard,
+          child: cards.when(
+            loading: () => const _CardsSkeleton(key: ValueKey('loading')),
+            error: (error, _) => PulseErrorState(
+              key: const ValueKey('error'),
+              title: 'Could not load your cards',
+              onRetry: () => ref.invalidate(cardsProvider),
+            ),
+            data: (list) => list.isEmpty
+                ? const _NoCards(key: ValueKey('empty'))
+                : _CardsBody(key: const ValueKey('data'), cards: list),
           ),
-          data: (list) => list.isEmpty
-              ? const _NoCards()
-              : _CardsBody(cards: list),
         ),
       ),
     );
@@ -42,7 +48,7 @@ class CardsScreen extends ConsumerWidget {
 }
 
 class _CardsBody extends ConsumerWidget {
-  const _CardsBody({required this.cards});
+  const _CardsBody({super.key, required this.cards});
 
   final List<PaymentCard> cards;
 
@@ -195,7 +201,7 @@ class _CardActivity extends ConsumerWidget {
 }
 
 class _CardsSkeleton extends StatelessWidget {
-  const _CardsSkeleton();
+  const _CardsSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +228,7 @@ class _CardsSkeleton extends StatelessWidget {
 }
 
 class _NoCards extends StatelessWidget {
-  const _NoCards();
+  const _NoCards({super.key});
 
   @override
   Widget build(BuildContext context) {

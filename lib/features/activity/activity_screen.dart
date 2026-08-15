@@ -28,13 +28,23 @@ class ActivityScreen extends ConsumerWidget {
       // The width constraint lives in AppShell now, so every screen shares it.
       body: SafeArea(
         bottom: false,
-        child: summary.when(
-          loading: () => const _ActivitySkeleton(),
-          error: (error, _) => PulseErrorState(
-            title: 'Could not load your activity',
-            onRetry: () => ref.invalidate(allTransactionsProvider),
+        // Keyed only by which branch is showing, not by the summary's own
+        // content — a period change still produces a new AsyncData, but that
+        // already flows through PulseSpendingChart's own tween. Keying this
+        // by period too would layer a whole-screen cross-fade on top of that
+        // and fight it instead of complementing it.
+        child: AnimatedSwitcher(
+          duration: PulseMotion.standard,
+          child: summary.when(
+            loading: () => const _ActivitySkeleton(key: ValueKey('loading')),
+            error: (error, _) => PulseErrorState(
+              key: const ValueKey('error'),
+              title: 'Could not load your activity',
+              onRetry: () => ref.invalidate(allTransactionsProvider),
+            ),
+            data: (data) =>
+                _ActivityBody(key: const ValueKey('data'), summary: data),
           ),
-          data: (data) => _ActivityBody(summary: data),
         ),
       ),
     );
@@ -42,7 +52,7 @@ class ActivityScreen extends ConsumerWidget {
 }
 
 class _ActivityBody extends StatelessWidget {
-  const _ActivityBody({required this.summary});
+  const _ActivityBody({super.key, required this.summary});
 
   final ActivitySummary summary;
 
@@ -114,7 +124,7 @@ class _ActivityHeader extends StatelessWidget {
 }
 
 class _ActivitySkeleton extends StatelessWidget {
-  const _ActivitySkeleton();
+  const _ActivitySkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {

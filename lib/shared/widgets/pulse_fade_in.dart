@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/pulse_motion.dart';
+
 /// Fades and lifts its child into place once, on first build.
 ///
 /// Staggering a screen's sections with increasing [delay] is what makes Pulse
@@ -41,9 +43,22 @@ class _PulseFadeInState extends State<PulseFadeIn>
     curve: Curves.easeOutCubic,
   );
 
+  bool _started = false;
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // MediaQuery isn't available yet in initState, and this only needs to
+    // run once, before the entrance would otherwise start.
+    if (_started) return;
+    _started = true;
+
+    // A reduced-motion request skips straight to the settled state — the
+    // entrance is decorative, so there's nothing lost by not playing it.
+    if (PulseMotion.reduced(context)) {
+      _controller.value = 1;
+      return;
+    }
     if (widget.delay == Duration.zero) {
       _controller.forward();
     } else {

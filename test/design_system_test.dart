@@ -200,12 +200,19 @@ void main() {
         host(const PulseChip(label: 'Week', selected: true)),
       );
 
-      final material = tester.widget<Material>(
+      // The animated colour now lives on the AnimatedContainer wrapping the
+      // chip's Material (which stays transparent so it doesn't paint under
+      // the animated background) — see PulseChip's motion pass.
+      final container = tester.widget<AnimatedContainer>(
         find
-            .ancestor(of: find.text('Week'), matching: find.byType(Material))
+            .ancestor(
+              of: find.text('Week'),
+              matching: find.byType(AnimatedContainer),
+            )
             .first,
       );
-      expect(material.color, PulseColors.light.accent);
+      final decoration = container.decoration as ShapeDecoration;
+      expect(decoration.color, PulseColors.light.accent);
     });
   });
 

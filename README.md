@@ -22,6 +22,13 @@ whole app is explorable without a backend.
   totals, and a category breakdown
 - **Custom spending visualization** — `PulseSpendingChart`, built from plain
   widgets and a small `CustomPainter`, with no charting package
+- **A custom-animated bottom navigation** — a lime "blob" indicator that
+  travels between destinations, stretching toward the direction of travel and
+  settling back down, built from Flutter's own animation primitives (no
+  animation package)
+- **A small, consistent motion system** (`PulseMotion`) — three durations and
+  two curves reused for press feedback, chip selection, loading transitions,
+  form entrances and validation, rather than ad hoc numbers per widget
 - **Riverpod state management** throughout, including a small pure-Dart
   analytics layer decoupled from the UI, and a centralized auth state
   (`Unauthenticated` / `Authenticating` / `Authenticated`)
@@ -32,7 +39,7 @@ whole app is explorable without a backend.
   `PulseBottomNavigation`, and more) that keeps every screen visually
   consistent
 - **Unit and widget test coverage** across the design system, screens,
-  analytics logic, and the auth/routing flow
+  analytics logic, personalization, and the auth/routing flow
 
 ## Authentication is mock and local-only
 
@@ -61,6 +68,12 @@ characters) also works and is treated as a fresh mock account — nothing is
 sent anywhere, and no data is validated against a real record. Forgot
 Password always shows the same neutral confirmation, whether or not the email
 is "known," which is the standard, safer behavior even for a mock.
+
+Whoever is signed in drives the *display identity* throughout the app —
+Home's greeting and the cardholder name printed on every card in the wallet.
+The underlying financial data (balance, transactions, merchants) is fixed
+demo data and is never regenerated or altered by who signed in; only the name
+printed on top of it changes.
 
 ## Not included
 
@@ -113,7 +126,8 @@ lib/
                              MaterialApp.router + theme wiring
   core/
     theme/                  design tokens: colors, type scale, spacing,
-                             radii, shadows, the signature notched card shape
+                             radii, shadows, motion durations/curves, the
+                             signature notched card shape
     routing/                GoRouter config, the auth redirect guard, and the
                              shared app shell
     persistence/            AppPreferences — the app's entire local storage
@@ -153,15 +167,19 @@ authenticated redirects to Home. This is enforced centrally in GoRouter's
 
 ## Testing
 
-**166 tests, all passing** — unit tests for the analytics, model, and
+**179 tests, all passing** — unit tests for the analytics, model, and
 validation logic; widget tests covering every screen (including the full
 splash → onboarding → login/sign-up → home → logout flow) and its layout at
 five viewport widths (320, 360, 390, 412, and a desktop width) with zero
-overflow; and route-guard tests confirming protected routes actually redirect.
+overflow; route-guard tests confirming protected routes actually redirect;
+personalization tests confirming a signed-up identity reaches the greeting and
+every card, survives the app being recreated, and never touches the
+underlying financial data; and navigation tests confirming the blob indicator
+tracks the selected destination and animates rather than jumping.
 
 ```sh
 flutter analyze   # no issues
-flutter test      # 166 passed
+flutter test      # 179 passed
 ```
 
 ## Screenshots
