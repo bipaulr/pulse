@@ -9,7 +9,9 @@ void main() {
     await pumpPulseApp(tester);
 
     expect(find.byType(AppShell), findsOneWidget);
-    expect(find.text('Home'), findsWidgets);
+    // The nav bar is icon-only now, so "on Home" is verified through the
+    // screen's own content rather than a nav label.
+    expect(find.text('Hi, Aarav'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -19,7 +21,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.credit_card_rounded));
     await tester.pumpAndSettle();
 
-    expect(find.text('Cards'), findsWidgets);
+    expect(find.text('My Cards'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.tap(find.byIcon(Icons.pie_chart_rounded));

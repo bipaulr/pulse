@@ -307,37 +307,99 @@ void main() {
   });
 
   group('PulseBottomNavigation', () {
-    testWidgets('labels only the selected destination and reports taps', (
+    Widget hostNav({
+      required int currentIndex,
+      required ValueChanged<int> onDestinationSelected,
+    }) {
+      return MaterialApp(
+        theme: PulseTheme.light,
+        home: Scaffold(
+          bottomNavigationBar: PulseBottomNavigation(
+            currentIndex: currentIndex,
+            onDestinationSelected: onDestinationSelected,
+            destinations: const [
+              PulseNavigationDestination(
+                icon: Icons.grid_view_rounded,
+                label: 'Home',
+              ),
+              PulseNavigationDestination(
+                icon: Icons.credit_card_rounded,
+                label: 'Cards',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    testWidgets('is icon-only — no destination label is ever rendered', (
+      tester,
+    ) async {
+      await tester.pumpWidget(hostNav(currentIndex: 0, onDestinationSelected: (_) {}));
+
+      expect(find.text('Home'), findsNothing);
+      expect(find.text('Cards'), findsNothing);
+      expect(find.byIcon(Icons.grid_view_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.credit_card_rounded), findsOneWidget);
+    });
+
+    testWidgets('reports taps on the destination that was pressed', (
       tester,
     ) async {
       var selected = 0;
       await tester.pumpWidget(
-        MaterialApp(
-          theme: PulseTheme.light,
-          home: Scaffold(
-            bottomNavigationBar: PulseBottomNavigation(
-              currentIndex: 0,
-              onDestinationSelected: (index) => selected = index,
-              destinations: const [
-                PulseNavigationDestination(
-                  icon: Icons.grid_view_rounded,
-                  label: 'Home',
-                ),
-                PulseNavigationDestination(
-                  icon: Icons.credit_card_rounded,
-                  label: 'Cards',
-                ),
-              ],
-            ),
+        hostNav(
+          currentIndex: 0,
+          onDestinationSelected: (index) => selected = index,
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.credit_card_rounded));
+      expect(selected, 1);
+    });
+
+    testWidgets('scales the selected icon up and leaves others at rest', (
+      tester,
+    ) async {
+      await tester.pumpWidget(hostNav(currentIndex: 0, onDestinationSelected: (_) {}));
+      await tester.pumpAndSettle();
+
+      AnimatedScale scaleOf(IconData icon) => tester.widget<AnimatedScale>(
+        find.ancestor(
+          of: find.byIcon(icon),
+          matching: find.byType(AnimatedScale),
+        ),
+      );
+
+      expect(scaleOf(Icons.grid_view_rounded).scale, greaterThan(1.0));
+      expect(scaleOf(Icons.credit_card_rounded).scale, 1.0);
+    });
+
+    testWidgets('the scale-up moves with selection, not with one icon', (
+      tester,
+    ) async {
+      var index = 0;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (context, setState) => hostNav(
+            currentIndex: index,
+            onDestinationSelected: (i) => setState(() => index = i),
           ),
         ),
       );
 
-      expect(find.text('Home'), findsOneWidget);
-      expect(find.text('Cards'), findsNothing);
-
       await tester.tap(find.byIcon(Icons.credit_card_rounded));
-      expect(selected, 1);
+      await tester.pumpAndSettle();
+
+      AnimatedScale scaleOf(IconData icon) => tester.widget<AnimatedScale>(
+        find.ancestor(
+          of: find.byIcon(icon),
+          matching: find.byType(AnimatedScale),
+        ),
+      );
+
+      expect(scaleOf(Icons.credit_card_rounded).scale, greaterThan(1.0));
+      expect(scaleOf(Icons.grid_view_rounded).scale, 1.0);
     });
   });
 }

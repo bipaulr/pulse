@@ -223,6 +223,10 @@ class _NavigationItem extends StatelessWidget {
         ? colors.onAccent
         : colors.onInverse.withValues(alpha: 0.55);
 
+    // Icon-only: the label is never shown. Selection reads purely through the
+    // blob underneath, this scale-up, and the colour swap — nothing else
+    // changes size or shifts layout, so the bar stays perfectly compact at
+    // every width.
     return Semantics(
       button: true,
       selected: selected,
@@ -233,46 +237,11 @@ class _NavigationItem extends StatelessWidget {
         child: SizedBox(
           height: 46,
           child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // The blob sits behind this, so only the icon itself needs to
-                // react — a small scale-up plus the colour swap is enough to
-                // read as "selected" without duplicating the pill.
-                AnimatedScale(
-                  scale: selected ? 1.08 : 1.0,
-                  duration: PulseMotion.fast,
-                  curve: PulseMotion.curve,
-                  child: AnimatedDefaultTextStyle(
-                    duration: PulseMotion.standard,
-                    curve: PulseMotion.curve,
-                    style: const TextStyle(),
-                    child: Icon(destination.icon, size: 22, color: foreground),
-                  ),
-                ),
-                // The label only exists for the active destination, which is
-                // what gives the bar its expanding-pill motion.
-                Flexible(
-                  child: AnimatedSize(
-                    duration: PulseMotion.standard,
-                    curve: PulseMotion.curve,
-                    child: selected
-                        ? Padding(
-                            padding: const EdgeInsets.only(left: PulseSpacing.sm),
-                            child: Text(
-                              destination.label,
-                              maxLines: 1,
-                              softWrap: false,
-                              overflow: TextOverflow.ellipsis,
-                              style: PulseTypography.labelSm.copyWith(
-                                color: foreground,
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ),
-              ],
+            child: AnimatedScale(
+              scale: selected ? 1.1 : 1.0,
+              duration: PulseMotion.fast,
+              curve: PulseMotion.curve,
+              child: Icon(destination.icon, size: 22, color: foreground),
             ),
           ),
         ),
