@@ -1,102 +1,97 @@
 # Pulse
 
-Pulse is a premium personal-finance app concept built in Flutter — a full
-onboarding and mock-login flow leading into a home dashboard, card wallet,
-transaction feed, and a spending-analytics screen with a hand-built chart, all
-sharing one custom design system. It runs entirely on local mock data, so the
-whole app is explorable without a backend.
+Pulse is a premium personal-finance app built in Flutter — a mobile-first
+fintech experience covering onboarding, authentication, a financial
+dashboard, card management, transaction tracking, and spending analytics,
+all wrapped in a custom design system with a hand-built motion language.
 
-## Features
+It runs entirely on local mock data behind a real repository/state
+architecture, so the UI, state management, and interaction design can be
+evaluated end to end without a backend.
 
-- **Splash, onboarding & auth flow** — a branded launch screen, a three-page
-  onboarding carousel (shown once), and mock Login / Sign Up / Forgot Password
-  screens gating the rest of the app
-- **Home dashboard** — balance summary, a notched virtual-card widget, quick
-  actions, and a recent-activity feed
-- **Card wallet** — a swipeable card carousel with per-card details, freeze /
-  unfreeze, a masked PIN reveal, and a replace-card confirmation flow
-- **Transactions** — a searchable, filterable, date-grouped transaction feed
-  with a dedicated details screen
-- **Activity & analytics** — total spending, a Week/Month/Quarter/Year period
-  selector, an interactive custom-painted bar chart, income vs. expense
-  totals, and a category breakdown
-- **Custom spending visualization** — `PulseSpendingChart`, built from plain
-  widgets and a small `CustomPainter`, with no charting package
-- **A custom-animated bottom navigation** — a lime "blob" indicator that
-  travels between destinations, stretching toward the direction of travel and
-  settling back down, built from Flutter's own animation primitives (no
-  animation package)
-- **A small, consistent motion system** (`PulseMotion`) — three durations and
-  two curves reused for press feedback, chip selection, loading transitions,
-  form entrances and validation, rather than ad hoc numbers per widget
-- **Riverpod state management** throughout, including a small pure-Dart
-  analytics layer decoupled from the UI, and a centralized auth state
-  (`Unauthenticated` / `Authenticating` / `Authenticated`)
-- **Responsive layout** — tuned for common phone widths and gracefully
-  constrained on desktop-width browser windows
-- **A component library** (`PulseCard`, `PulseButton`, `PulseChip`,
-  `PulseAmount`, `PulseTextField`, `PulseTransactionTile`,
-  `PulseBottomNavigation`, and more) that keeps every screen visually
-  consistent
-- **Unit and widget test coverage** across the design system, screens,
-  analytics logic, personalization, and the auth/routing flow
+---
 
-## Authentication is mock and local-only
+## ✨ Features
 
-There is no backend, no server, and no real account system. "Signing in" and
-"signing up" are simulated by a small in-memory repository with a short,
-artificial delay standing in for a network call. **No password is ever
-transmitted or hashed anywhere** — this is a UI/UX demonstration, not a
-security implementation, and must not be treated as one.
+### Dashboard
+- Balance summary with a trend indicator
+- Animated, notched virtual-card widget
+- Quick actions (Deposit, Transfer, Withdraw, More)
+- Recent-activity feed with a staggered entrance
 
-What *is* real: a session is persisted locally via
-[`shared_preferences`](https://pub.dev/packages/shared_preferences) (Chrome's
-`localStorage` under the hood), so a signed-in session and "onboarding seen"
-survive a page reload. That is the entire persistence layer in the app — no
-transactions, cards, or other data are stored locally; they regenerate from
-the mock dataset each run.
+### Cards
+- Swipeable card carousel with smooth, physical settling
+- Per-card details (masked number, network, balance)
+- Freeze / unfreeze with visual feedback
+- Masked PIN reveal with an auto-hide timer
+- Replace-card confirmation sheet
 
-**Demo account** — use this to log in without signing up:
+### Transactions
+- Searchable, debounced transaction feed
+- Category and income/expense filter chips
+- Date-grouped list (Today / Yesterday / by date)
+- Dedicated transaction details screen
 
-```
-Email:    demo@pulse.app
-Password: pulse1234
-```
+### Activity & Analytics
+- Total spending with period-over-period change
+- Income vs. expense summary
+- Custom-painted spending chart (Week / Month / Quarter / Year)
+- Category breakdown
+- Recent transfers
 
-Signing up with any other well-formed name, email and password (minimum 8
-characters) also works and is treated as a fresh mock account — nothing is
-sent anywhere, and no data is validated against a real record. Forgot
-Password always shows the same neutral confirmation, whether or not the email
-is "known," which is the standard, safer behavior even for a mock.
+### Authentication
+- Branded splash screen
+- Three-page onboarding carousel (shown once)
+- Login, Sign Up, and Forgot Password flows
+- Logout, with centrally enforced route protection
+- Mock, local-only authentication (see [Demo Account](#demo-account))
 
-Whoever is signed in drives the *display identity* throughout the app —
-Home's greeting and the cardholder name printed on every card in the wallet.
-The underlying financial data (balance, transactions, merchants) is fixed
-demo data and is never regenerated or altered by who signed in; only the name
-printed on top of it changes.
+### Motion
+- Custom animated bottom navigation with a lime "blob" indicator that
+  travels between destinations and settles into place
+- Icon-only navigation items with a subtle scale-up on selection
+- Card carousel and payment-card tap feedback
+- Chart entrance and selected-bar animations
+- A small reusable motion system (durations + curves) applied consistently
+  across chips, buttons, form validation, and loading transitions
 
-## Not included
+---
 
-This is a UI/UX-focused MVP. There is no backend, no REST API, no real
-authentication (see above), no payment processing, no offline sync, and no
-persisted storage beyond the two auth/onboarding flags described above.
-Android has not been tested; Chrome is the supported and verified target.
+## 🧠 Technical Highlights
 
-## Tech stack
+**State management with Riverpod** — Every feature (Home, Cards,
+Transactions, Activity, Auth) is backed by a repository interface and
+exposed through Riverpod providers. Screens `watch` derived state; mutations
+go through notifiers. This keeps UI, business logic, and data sources
+cleanly separated and easy to test in isolation.
 
-- [Flutter](https://flutter.dev) & Dart (Material 3, custom theme)
-- [flutter_riverpod](https://pub.dev/packages/flutter_riverpod) for state
-  management
-- [go_router](https://pub.dev/packages/go_router) for declarative,
-  shell-based navigation, including the auth redirect guard
-- [shared_preferences](https://pub.dev/packages/shared_preferences) for the
-  two persisted flags (onboarding seen, mock session)
-- `flutter_test` for unit and widget tests
+**Custom-built chart** — The spending visualization
+(`PulseSpendingChart`) is not a charting library. It's built from plain
+Flutter widgets plus a small `CustomPainter` for the axis gridlines, with
+its own tween-based animation for bar entrance and period transitions.
 
-No charting or networking packages are used — the chart is hand-built and the
-data layer is local by design.
+**A small, reusable motion system** — Rather than ad hoc animation
+durations scattered across widgets, Pulse defines a `PulseMotion` token set
+(three durations, two curves) used consistently for press feedback, chip
+selection, loading-state transitions, and form validation. The bottom
+navigation's travelling "blob" indicator is a hand-built animation — two
+independently-eased edges that stretch toward the destination and settle
+back down — built entirely on Flutter's own `AnimationController` and
+`Positioned` APIs, no animation package involved.
 
-## Architecture
+**Responsive by construction** — The layout is verified in Chrome at
+320×640, 360×800, 390×844, 412×915, and a desktop width, with a maximum
+content width applied on wide viewports so the UI reads as an intentional
+phone-first layout rather than a stretched mobile page.
+
+**Test coverage** — 182 automated tests (`flutter test`) covering the
+design-system components, screen behavior, analytics calculations,
+authentication and route-guard logic, and personalization, alongside a
+clean `flutter analyze`.
+
+---
+
+## 🏗️ Architecture
 
 ```
 Flutter UI  (screens + the Pulse component library)
@@ -105,108 +100,147 @@ Flutter UI  (screens + the Pulse component library)
 Riverpod providers  (per-feature state: selection, filters, period, auth)
      │
      ▼
-Analytics layer  (ActivityAnalytics — pure functions, no Flutter import)
+Analytics layer  (pure functions, no Flutter dependency)
      │
      ▼
-Mock data layer  (MockDataset for transactions/cards/balances;
-                  MockAuthRepository for login/sign-up/reset)
+Repositories  (HomeRepository, CardsRepository, TransactionsRepository,
+               AuthRepository — interfaces, backed by mock implementations)
      │
      ▼
-Local persistence  (AppPreferences — onboarding flag + mock session only)
+Mock / local data  (a shared in-memory dataset + two persisted flags
+                     via shared_preferences: onboarding seen, mock session)
 ```
 
-Every screen reads through a repository interface (`HomeRepository`,
-`CardsRepository`, `TransactionsRepository`, `AuthRepository`), so the mock
-implementations are a swappable seam rather than something baked into the UI —
-a REST-backed implementation is a binding change, not a rewrite.
+Every repository is an interface with a mock implementation behind it, so
+swapping in a REST-backed implementation later is a binding change, not a
+rewrite — none of the UI or state layer depends on the data being local.
 
 ```
 lib/
-  main.dart, app.dart       entry point (awaits SharedPreferences once),
-                             MaterialApp.router + theme wiring
+  main.dart, app.dart     Entry point, MaterialApp.router + theme wiring
   core/
-    theme/                  design tokens: colors, type scale, spacing,
-                             radii, shadows, motion durations/curves, the
-                             signature notched card shape
-    routing/                GoRouter config, the auth redirect guard, and the
-                             shared app shell
-    persistence/            AppPreferences — the app's entire local storage
-    clock.dart               the app's single "now" — overridable in tests
+    theme/                Design tokens — colors, type scale, spacing,
+                           radii, shadows, motion durations/curves
+    routing/               GoRouter config, the auth redirect guard,
+                           the shared app shell + bottom navigation
+    persistence/            The app's entire local storage surface
   shared/
-    data/                   MockDataset — the one source of sample data
-    models/                 domain models (transactions, cards, etc.)
-    widgets/                the Pulse component library
+    data/                  The shared mock dataset
+    models/                 Domain models (transactions, cards, users, ...)
+    widgets/                The Pulse component library (PulseCard,
+                             PulseButton, PulseChip, PulseTextField, ...)
   features/
-    auth/                   splash, onboarding, login, sign-up, forgot
-                             password, and the auth controller/state
-    home/ cards/ transactions/ activity/
-                             one folder per screen, each with its own
-                             data/ (repositories, providers) and widgets/
+    auth/                  Splash, onboarding, login, sign-up, forgot
+                            password, auth state
+    home/  cards/  transactions/  activity/
+                            One folder per screen, each with its own
+                            data/ (repository + providers) and widgets/
 ```
 
-## Navigation & route protection
+---
 
-```
-Splash → Onboarding (first run only) → Login ⇄ Sign Up
-                                          │
-                                          ▼
-                                        Home ⇄ Cards ⇄ Transactions ⇄ Activity
-                                          │
-                                          ▼
-                                       Log Out (from the avatar on Home)
-                                          │
-                                          ▼
-                                        Login
-```
+## 🛠️ Tech Stack
 
-Home, Cards, Transactions, Activity and transaction details are all protected
-routes: visiting one while unauthenticated redirects to Login (or Onboarding,
-for a first-time visitor); visiting Login, Sign Up or Onboarding while already
-authenticated redirects to Home. This is enforced centrally in GoRouter's
-`redirect`, not by scattered `isLoggedIn` checks in individual screens.
+| Category | Technology |
+|---|---|
+| Framework | [Flutter](https://flutter.dev) & Dart |
+| State management | [flutter_riverpod](https://pub.dev/packages/flutter_riverpod) |
+| Navigation | [go_router](https://pub.dev/packages/go_router) (declarative, shell-based, with a redirect-based auth guard) |
+| Local persistence | [shared_preferences](https://pub.dev/packages/shared_preferences) |
+| Data visualization | Hand-built with `CustomPainter` — no charting package |
+| Testing | `flutter_test` (unit + widget tests) |
 
-## Testing
+No backend, database, or networking package is used — Pulse is intentionally
+a local, UI/UX-focused build.
 
-**179 tests, all passing** — unit tests for the analytics, model, and
-validation logic; widget tests covering every screen (including the full
-splash → onboarding → login/sign-up → home → logout flow) and its layout at
-five viewport widths (320, 360, 390, 412, and a desktop width) with zero
-overflow; route-guard tests confirming protected routes actually redirect;
-personalization tests confirming a signed-up identity reaches the greeting and
-every card, survives the app being recreated, and never touches the
-underlying financial data; and navigation tests confirming the blob indicator
-tracks the selected destination and animates rather than jumping.
+---
 
-```sh
-flutter analyze   # no issues
-flutter test      # 179 passed
-```
+## 📸 Screenshots
 
-## Screenshots
-
-Not yet included. To capture your own:
+Screenshots aren't included in this repository yet. To generate your own:
 
 ```sh
 flutter run -d chrome --web-browser-flag="--window-size=412,915"
 ```
 
-then screenshot the auth flow and each tab (Home, Cards, Transactions,
-Activity) and drop the images under a `screenshots/` folder, linked here.
+then capture the onboarding flow and each of the four tabs (Home, Cards,
+Transactions, Activity).
 
-## Running locally
+---
 
-Chrome is the primary and verified target.
+## 🔑 Demo Account
+
+Authentication is **mock and local-only** — included for demonstration
+purposes. There is no backend, and no credentials are transmitted or
+verified against a real service.
+
+```text
+Email:    demo@pulse.app
+Password: pulse1234
+```
+
+Signing up with any other name, a valid-looking email, and an 8+ character
+password also works and is treated as a fresh mock session — nothing is
+sent anywhere.
+
+---
+
+## 🚀 Running Locally
+
+Chrome is the current, verified runtime target for this project.
 
 ```sh
+git clone https://github.com/bipaulr/pulse.git
+cd pulse
 flutter pub get
 flutter run -d chrome
 ```
 
-To check a specific phone width, launch with a fixed window size, e.g.:
+On first launch you'll see onboarding — skip it or step through, then sign
+in with the demo account above (or sign up with anything else).
+
+---
+
+## ✅ Testing
 
 ```sh
-flutter run -d chrome --web-browser-flag="--window-size=390,844"
+flutter analyze   # no issues
+flutter test      # 182 passed
 ```
 
-On first launch you'll see onboarding; skip it or step through, then log in
-with the demo account above (or sign up with anything else).
+The app has been manually verified in Chrome at the following viewport
+widths, with no layout overflow:
+
+- 320 × 640
+- 360 × 800
+- 390 × 844
+- 412 × 915
+- Desktop width
+
+---
+
+## 📦 Project Scope
+
+Pulse is an MVP focused on interface, interaction, and state-management
+design. The current version intentionally uses:
+
+- Mock, local-only authentication (no real account system)
+- Mock financial data (balances, cards, transactions)
+- Local persistence limited to two flags (onboarding seen, mock session)
+- No production backend or REST API
+- No real payment processing
+
+These are deliberate boundaries for this stage of the project, not gaps —
+the architecture (repository interfaces behind every feature) is already
+shaped for a backend to be introduced without restructuring the UI.
+
+---
+
+## 🎨 Design Philosophy
+
+Pulse is built around a minimal, high-contrast fintech aesthetic — an
+off-white canvas, near-black typography, and an electric lime accent used
+deliberately rather than everywhere. Financial figures get the strongest
+typographic weight on any given screen, corners are generously rounded, and
+motion is restrained and consistent: small, purposeful transitions rather
+than decoration for its own sake.
