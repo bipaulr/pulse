@@ -28,11 +28,14 @@ extension PulseThemeContext on BuildContext {
 
 /// Builds the Pulse [ThemeData].
 ///
-/// Only [light] exists today. A dark palette is added by defining a
-/// `PulseColors.dark` and calling [_build] with it — no widget changes needed,
-/// because components resolve everything through [PulseThemeContext].
+/// [light] and [dark] share every structural theme decision below — only the
+/// [PulseColors] palette and [Brightness] differ — because components resolve
+/// all colour through [PulseThemeContext] rather than referencing either
+/// theme directly.
 abstract final class PulseTheme {
   static ThemeData get light => _build(PulseColors.light, Brightness.light);
+
+  static ThemeData get dark => _build(PulseColors.dark, Brightness.dark);
 
   static ThemeData _build(PulseColors colors, Brightness brightness) {
     final textTheme = PulseTypography.textTheme(

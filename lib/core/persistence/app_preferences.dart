@@ -2,6 +2,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// The persisted theme preference. Kept independent of Flutter's own
+/// `ThemeMode` so this layer has no widgets dependency — [PulseApp] maps it
+/// to `ThemeMode` at the one place that actually needs it.
+enum AppThemeMode {
+  system,
+  light,
+  dark;
+
+  static AppThemeMode fromName(String? name) => AppThemeMode.values
+      .firstWhere((mode) => mode.name == name, orElse: () => AppThemeMode.system);
+}
+
 /// The minimum session snapshot needed to restore a "logged in" state across
 /// restarts. Never a password — only what the UI needs to greet the user.
 @immutable
@@ -31,6 +43,9 @@ abstract interface class AppPreferences {
   AuthSession? get session;
   Future<void> saveSession(AuthSession session);
   Future<void> clearSession();
+
+  AppThemeMode get themeMode;
+  Future<void> setThemeMode(AppThemeMode mode);
 }
 
 class SharedPreferencesAppPreferences implements AppPreferences {
@@ -42,6 +57,7 @@ class SharedPreferencesAppPreferences implements AppPreferences {
   static const _firstNameKey = 'pulse.session.first_name';
   static const _lastNameKey = 'pulse.session.last_name';
   static const _emailKey = 'pulse.session.email';
+  static const _themeModeKey = 'pulse.theme_mode';
 
   @override
   bool get onboardingComplete => _prefs.getBool(_onboardingKey) ?? false;
@@ -74,6 +90,13 @@ class SharedPreferencesAppPreferences implements AppPreferences {
     await _prefs.remove(_lastNameKey);
     await _prefs.remove(_emailKey);
   }
+
+  @override
+  AppThemeMode get themeMode => AppThemeMode.fromName(_prefs.getString(_themeModeKey));
+
+  @override
+  Future<void> setThemeMode(AppThemeMode mode) =>
+      _prefs.setString(_themeModeKey, mode.name);
 }
 
 /// Must be overridden — in `main()` with a [SharedPreferencesAppPreferences]

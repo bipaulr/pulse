@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/routing/app_routes.dart';
 import '../../core/theme/pulse_theme.dart';
+import '../../core/theme/theme_mode_controller.dart';
 import '../../shared/models/models.dart';
 import '../../shared/widgets/widgets.dart';
 import '../auth/data/auth_controller.dart';
@@ -163,6 +164,15 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: PulseSpacing.xl),
+                Consumer(
+                  builder: (context, sheetRef, _) => _ThemeModeRow(
+                    current: sheetRef.watch(themeModeControllerProvider),
+                    onSelect: (mode) => sheetRef
+                        .read(themeModeControllerProvider.notifier)
+                        .setThemeMode(mode),
+                  ),
+                ),
                 const SizedBox(height: PulseSpacing.xxl),
                 PulseButton(
                   label: 'Log Out',
@@ -200,5 +210,43 @@ class HomeScreen extends ConsumerWidget {
           duration: const Duration(seconds: 2),
         ),
       );
+  }
+}
+
+/// The System / Light / Dark segmented control shown in the profile sheet.
+class _ThemeModeRow extends StatelessWidget {
+  const _ThemeModeRow({required this.current, required this.onSelect});
+
+  final ThemeMode current;
+  final ValueChanged<ThemeMode> onSelect;
+
+  static const _options = [
+    (ThemeMode.system, 'Auto'),
+    (ThemeMode.light, 'Light'),
+    (ThemeMode.dark, 'Dark'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.pulseColors;
+
+    return Row(
+      children: [
+        Text(
+          'Appearance',
+          style: PulseTypography.labelSm.copyWith(color: colors.textSecondary),
+        ),
+        const Spacer(),
+        for (final (mode, label) in _options) ...[
+          PulseChip(
+            label: label,
+            selected: current == mode,
+            dense: true,
+            onTap: () => onSelect(mode),
+          ),
+          if (mode != _options.last.$1) const SizedBox(width: PulseSpacing.xs),
+        ],
+      ],
+    );
   }
 }

@@ -49,6 +49,28 @@ void main() {
       expect(colors, PulseColors.light);
     });
 
+    testWidgets('PulseTheme.dark exposes the dark palette and brightness', (
+      tester,
+    ) async {
+      late PulseColors colors;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: PulseTheme.dark,
+          home: Builder(
+            builder: (context) {
+              colors = context.pulseColors;
+              expect(Theme.of(context).brightness, Brightness.dark);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect(colors, PulseColors.dark);
+      // The lime accent is a brand constant, not a light/dark variant.
+      expect(colors.accent, PulseBrand.lime);
+    });
+
     test('lerp interpolates every role', () {
       final mid = PulseColors.light.lerp(
         PulseColors.light.copyWith(accent: const Color(0xFF000000)),

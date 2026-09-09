@@ -6,11 +6,14 @@ class InMemoryAppPreferences implements AppPreferences {
   InMemoryAppPreferences({
     bool onboardingComplete = true,
     AuthSession? session,
+    AppThemeMode themeMode = AppThemeMode.system,
   }) : _onboardingComplete = onboardingComplete,
-       _session = session;
+       _session = session,
+       _themeMode = themeMode;
 
   bool _onboardingComplete;
   AuthSession? _session;
+  AppThemeMode _themeMode;
 
   @override
   bool get onboardingComplete => _onboardingComplete;
@@ -31,5 +34,13 @@ class InMemoryAppPreferences implements AppPreferences {
   @override
   Future<void> clearSession() async {
     _session = null;
+  }
+
+  @override
+  AppThemeMode get themeMode => _themeMode;
+
+  @override
+  Future<void> setThemeMode(AppThemeMode mode) async {
+    _themeMode = mode;
   }
 }

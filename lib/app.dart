@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/routing/app_router.dart';
 import 'core/theme/pulse_theme.dart';
+import 'core/theme/theme_mode_controller.dart';
 
 /// Root of the Pulse app.
 ///
-/// `themeMode` is pinned to light for now; wiring a dark palette later means
-/// adding `darkTheme` here and a `PulseColors.dark` — no widget changes.
+/// `themeMode` follows [themeModeControllerProvider], which defaults to
+/// [ThemeMode.system] and persists an explicit override via
+/// [AppPreferences].
 class PulseApp extends ConsumerWidget {
   const PulseApp({super.key});
 
@@ -17,7 +19,8 @@ class PulseApp extends ConsumerWidget {
       title: 'Pulse',
       debugShowCheckedModeBanner: false,
       theme: PulseTheme.light,
-      themeMode: ThemeMode.light,
+      darkTheme: PulseTheme.dark,
+      themeMode: ref.watch(themeModeControllerProvider),
       routerConfig: ref.watch(goRouterProvider),
     );
   }

@@ -42,6 +42,18 @@ abstract final class PulseBrand {
 
   static const positive = Color(0xFF4E9F3D);
   static const negative = Color(0xFFD9544D);
+
+  // --- Dark-theme-only surfaces and text tones. Not derived from the light
+  // literals above (a dimmed off-white makes a poor dark background), so they
+  // get their own names rather than a "Dark" suffix on unrelated concepts.
+  static const nearBlack = Color(0xFF0B0C0F);
+  static const charcoal = Color(0xFF17191D);
+  static const charcoalDeep = Color(0xFF212327);
+  static const charcoalHighlight = Color(0xFF2B2D32);
+  static const limeWashDark = Color(0xFF2B3319);
+  static const borderDark = Color(0xFF2B2D33);
+  static const greyLightDark = Color(0xFF9498A0);
+  static const greyLighterDark = Color(0xFF6C7078);
 }
 
 /// Semantic colour roles for Pulse, exposed as a [ThemeExtension].
@@ -140,6 +152,29 @@ class PulseColors extends ThemeExtension<PulseColors> {
     skeletonBase: PulseBrand.stone,
     skeletonHighlight: PulseBrand.white,
     shadow: PulseBrand.ink,
+  );
+
+  static const dark = PulseColors(
+    background: PulseBrand.nearBlack,
+    surface: PulseBrand.charcoal,
+    surfaceMuted: PulseBrand.charcoalDeep,
+    surfaceInverse: PulseBrand.inkSurface,
+    accent: PulseBrand.lime,
+    accentPressed: PulseBrand.limeDeep,
+    accentSoft: PulseBrand.limeWashDark,
+    accentAlt: PulseBrand.citron,
+    accentMuted: PulseBrand.green,
+    textPrimary: PulseBrand.offWhite,
+    textSecondary: PulseBrand.greyLightDark,
+    textTertiary: PulseBrand.greyLighterDark,
+    onAccent: PulseBrand.ink,
+    onInverse: PulseBrand.offWhite,
+    positive: PulseBrand.positive,
+    negative: PulseBrand.negative,
+    border: PulseBrand.borderDark,
+    skeletonBase: PulseBrand.charcoalDeep,
+    skeletonHighlight: PulseBrand.charcoalHighlight,
+    shadow: PulseBrand.nearBlack,
   );
 
   @override
