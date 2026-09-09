@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pulse/core/persistence/app_preferences.dart';
 import 'package:pulse/core/routing/app_routes.dart';
 import 'package:pulse/features/cards/data/cards_repository.dart';
 import 'package:pulse/features/cards/widgets/card_actions.dart';
@@ -8,6 +9,7 @@ import 'package:pulse/features/cards/widgets/card_carousel.dart';
 import 'package:pulse/shared/data/mock_dataset.dart';
 import 'package:pulse/shared/widgets/pulse_payment_card.dart';
 
+import 'support/in_memory_app_preferences.dart';
 import 'support/pump_app.dart';
 
 void main() {
@@ -116,6 +118,19 @@ void main() {
       expect(find.text('Replace this card?'), findsNothing);
     });
 
+    testWidgets('confirming Replace issues a new card', (tester) async {
+      await openCards(tester);
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Replace Card'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Replace'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Card replaced'), findsOneWidget);
+    });
+
     testWidgets('card activity links through to the feed', (tester) async {
       await openCards(tester);
       await tester.drag(find.byType(ListView), const Offset(0, -900));
@@ -149,6 +164,61 @@ void main() {
           reason: 'overflowed at ${size.width}x${size.height}',
         );
       }
+    });
+  });
+
+  group('Persistence', () {
+    test('freezing a card persists across an app restart', () async {
+      final store = InMemoryAppPreferences(onboardingComplete: true);
+
+      final firstRun = ProviderContainer(
+        overrides: [appPreferencesProvider.overrideWithValue(store)],
+      );
+      firstRun
+          .read(frozenCardsProvider.notifier)
+          .toggle(MockDataset.primaryCardId);
+      expect(
+        firstRun.read(frozenCardsProvider),
+        contains(MockDataset.primaryCardId),
+      );
+      firstRun.dispose();
+
+      final secondRun = ProviderContainer(
+        overrides: [appPreferencesProvider.overrideWithValue(store)],
+      );
+      addTearDown(secondRun.dispose);
+
+      expect(
+        secondRun.read(frozenCardsProvider),
+        contains(MockDataset.primaryCardId),
+      );
+    });
+  });
+
+  group('models', () {
+    test('FrozenCards.unfreeze clears and persists the change', () async {
+      final store = InMemoryAppPreferences(onboardingComplete: true);
+      final container = ProviderContainer(
+        overrides: [appPreferencesProvider.overrideWithValue(store)],
+      );
+      addTearDown(container.dispose);
+
+      container
+          .read(frozenCardsProvider.notifier)
+          .toggle(MockDataset.primaryCardId);
+      expect(
+        container.read(frozenCardsProvider),
+        contains(MockDataset.primaryCardId),
+      );
+
+      container
+          .read(frozenCardsProvider.notifier)
+          .unfreeze(MockDataset.primaryCardId);
+      expect(
+        container.read(frozenCardsProvider),
+        isNot(contains(MockDataset.primaryCardId)),
+      );
+      expect(store.frozenCardIds, isNot(contains(MockDataset.primaryCardId)));
     });
   });
 }

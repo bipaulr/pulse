@@ -7,13 +7,16 @@ class InMemoryAppPreferences implements AppPreferences {
     bool onboardingComplete = true,
     AuthSession? session,
     AppThemeMode themeMode = AppThemeMode.system,
+    Set<String> frozenCardIds = const {},
   }) : _onboardingComplete = onboardingComplete,
        _session = session,
-       _themeMode = themeMode;
+       _themeMode = themeMode,
+       _frozenCardIds = frozenCardIds;
 
   bool _onboardingComplete;
   AuthSession? _session;
   AppThemeMode _themeMode;
+  Set<String> _frozenCardIds;
 
   @override
   bool get onboardingComplete => _onboardingComplete;
@@ -42,5 +45,13 @@ class InMemoryAppPreferences implements AppPreferences {
   @override
   Future<void> setThemeMode(AppThemeMode mode) async {
     _themeMode = mode;
+  }
+
+  @override
+  Set<String> get frozenCardIds => _frozenCardIds;
+
+  @override
+  Future<void> setFrozenCardIds(Set<String> ids) async {
+    _frozenCardIds = ids;
   }
 }

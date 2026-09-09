@@ -46,6 +46,11 @@ abstract interface class AppPreferences {
 
   AppThemeMode get themeMode;
   Future<void> setThemeMode(AppThemeMode mode);
+
+  /// Ids of cards the user has frozen — survives an app restart, unlike the
+  /// in-memory-only state this used to be.
+  Set<String> get frozenCardIds;
+  Future<void> setFrozenCardIds(Set<String> ids);
 }
 
 class SharedPreferencesAppPreferences implements AppPreferences {
@@ -58,6 +63,7 @@ class SharedPreferencesAppPreferences implements AppPreferences {
   static const _lastNameKey = 'pulse.session.last_name';
   static const _emailKey = 'pulse.session.email';
   static const _themeModeKey = 'pulse.theme_mode';
+  static const _frozenCardIdsKey = 'pulse.frozen_card_ids';
 
   @override
   bool get onboardingComplete => _prefs.getBool(_onboardingKey) ?? false;
@@ -97,6 +103,14 @@ class SharedPreferencesAppPreferences implements AppPreferences {
   @override
   Future<void> setThemeMode(AppThemeMode mode) =>
       _prefs.setString(_themeModeKey, mode.name);
+
+  @override
+  Set<String> get frozenCardIds =>
+      (_prefs.getStringList(_frozenCardIdsKey) ?? const []).toSet();
+
+  @override
+  Future<void> setFrozenCardIds(Set<String> ids) =>
+      _prefs.setStringList(_frozenCardIdsKey, ids.toList(growable: false));
 }
 
 /// Must be overridden — in `main()` with a [SharedPreferencesAppPreferences]

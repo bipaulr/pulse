@@ -86,10 +86,16 @@ class _CardActionsState extends ConsumerState<CardActions> {
       builder: (sheetContext) =>
           _ReplaceCardSheet(last4: widget.card.last4),
     );
+    if (confirmed != true || !mounted) return;
 
-    if (confirmed == true && mounted) {
-      _notify('Card replacement isn\'t available yet');
-    }
+    final replaced = await ref
+        .read(cardsRepositoryProvider)
+        .replaceCard(widget.card.id);
+    ref.read(cardOverridesProvider.notifier).apply(replaced);
+    ref.read(frozenCardsProvider.notifier).unfreeze(widget.card.id);
+    if (!mounted) return;
+
+    _notify('Card replaced — new number ending •••• ${replaced.last4}');
   }
 
   void _notify(String message) {

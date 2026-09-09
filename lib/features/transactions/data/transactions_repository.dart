@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/clock.dart';
+import '../../../shared/data/ledger_controller.dart';
 import '../../../shared/data/mock_dataset.dart';
 import '../../../shared/models/models.dart';
 
@@ -26,10 +27,16 @@ final transactionsRepositoryProvider = Provider<TransactionsRepository>(
   (ref) => MockTransactionsRepository(now: ref.watch(nowProvider)()),
 );
 
-/// Every transaction, newest first.
-final allTransactionsProvider = FutureProvider<List<PulseTransaction>>(
-  (ref) => ref.watch(transactionsRepositoryProvider).fetchAll(),
-);
+/// Every transaction, newest first — the fixed mock history with whatever
+/// Home's Quick Actions have added on top (see [ledgerControllerProvider]),
+/// so a deposit or transfer made from Home shows up here too.
+final allTransactionsProvider = FutureProvider<List<PulseTransaction>>((
+  ref,
+) async {
+  final base = await ref.watch(transactionsRepositoryProvider).fetchAll();
+  final additions = ref.watch(ledgerControllerProvider).transactions;
+  return [...additions, ...base];
+});
 
 /// Lookup for the details screen. Null while loading or if the id is unknown.
 final transactionByIdProvider = Provider.family<PulseTransaction?, String>((

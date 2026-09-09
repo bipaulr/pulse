@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pulse/core/routing/app_routes.dart';
 import 'package:pulse/core/theme/pulse_theme.dart';
 import 'package:pulse/shared/models/models.dart';
+import 'package:pulse/shared/widgets/pulse_button.dart';
 import 'package:pulse/shared/widgets/pulse_payment_card.dart';
 
 import 'support/pump_app.dart';
@@ -44,13 +45,76 @@ void main() {
       }
     });
 
-    testWidgets('quick actions admit they do nothing yet', (tester) async {
+    testWidgets('More still admits it does nothing yet', (tester) async {
+      await pumpHome(tester);
+
+      await tester.tap(find.text('More'));
+      await tester.pump();
+
+      expect(find.text('More actions is coming soon'), findsOneWidget);
+    });
+
+    testWidgets('Deposit adds to the balance and to Recent Activity', (
+      tester,
+    ) async {
       await pumpHome(tester);
 
       await tester.tap(find.text('Deposit'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '500');
+      await tester.tap(find.widgetWithText(PulseButton, 'Deposit'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Deposited ₹500'), findsOneWidget);
+      expect(find.text('₹43,350.00'), findsOneWidget);
+
+      await tester.drag(find.byType(ListView), const Offset(0, -600));
+      await tester.pumpAndSettle();
+      expect(find.text('Deposit'), findsWidgets);
+    });
+
+    testWidgets('Withdraw rejects an amount over the available balance', (
+      tester,
+    ) async {
+      await pumpHome(tester);
+
+      await tester.tap(find.text('Withdraw'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '999999');
+      await tester.tap(find.widgetWithText(PulseButton, 'Withdraw'));
       await tester.pump();
 
-      expect(find.text('Deposit is coming soon'), findsOneWidget);
+      expect(
+        find.text('That\'s more than your available balance'),
+        findsOneWidget,
+      );
+      // The sheet is still open on top — the balance underneath never changed.
+      expect(find.text('₹42,850.00'), findsOneWidget);
+    });
+
+    testWidgets('Transfer requires a recipient before it will submit', (
+      tester,
+    ) async {
+      await pumpHome(tester);
+
+      await tester.tap(find.text('Transfer'));
+      await tester.pumpAndSettle();
+
+      final amountField = find.byType(TextField).last;
+      await tester.enterText(amountField, '200');
+      await tester.tap(find.widgetWithText(PulseButton, 'Send'));
+      await tester.pump();
+
+      expect(find.text('Enter a recipient'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField).first, 'Priya');
+      await tester.tap(find.widgetWithText(PulseButton, 'Send'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sent ₹200 to Priya'), findsOneWidget);
+      expect(find.text('₹42,650.00'), findsOneWidget);
     });
 
     testWidgets('lists the recent transactions', (tester) async {

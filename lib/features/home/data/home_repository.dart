@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/clock.dart';
+import '../../../shared/data/ledger_controller.dart';
 import '../../../shared/data/mock_dataset.dart';
+import '../../../shared/models/models.dart';
 import '../../auth/data/auth_controller.dart';
 import 'home_snapshot.dart';
 
@@ -43,15 +45,33 @@ final homeRepositoryProvider = Provider<HomeRepository>(
 /// The mock dataset's user and card holder name are overlaid with whoever
 /// actually signed in, so a freshly signed-up identity shows up consistently
 /// in the greeting *and* on the card face — the two are only guaranteed to
-/// match the underlying mock data for the demo account. Balances,
-/// transactions and merchant data are never touched by this: those are fixed
-/// demo financial data, not identity.
+/// match the underlying mock data for the demo account. Merchant data is
+/// never touched by this: that's fixed demo financial data, not identity.
+///
+/// The balance and recent-activity list, on the other hand, are overlaid with
+/// [ledgerControllerProvider] — Home's Quick Actions write there, and this is
+/// what makes a deposit or transfer show up immediately.
 final homeSnapshotProvider = Provider<HomeSnapshot>((ref) {
   final snapshot = ref.watch(homeRepositoryProvider).load();
+  final additions = ref.watch(ledgerControllerProvider);
   final signedInUser = ref.watch(authControllerProvider).user;
-  if (signedInUser == null) return snapshot;
-  return snapshot.copyWith(
+
+  final withLedger = snapshot.copyWith(
+    balance: BalanceSummary(
+      total: snapshot.balance.total + additions.balanceDelta,
+      changePercent: snapshot.balance.changePercent,
+      periodLabel: snapshot.balance.periodLabel,
+      currencySymbol: snapshot.balance.currencySymbol,
+    ),
+    recentTransactions: [
+      ...additions.transactions,
+      ...snapshot.recentTransactions,
+    ].take(5).toList(growable: false),
+  );
+
+  if (signedInUser == null) return withLedger;
+  return withLedger.copyWith(
     user: signedInUser,
-    card: snapshot.card.copyWith(holderName: signedInUser.fullName),
+    card: withLedger.card.copyWith(holderName: signedInUser.fullName),
   );
 });

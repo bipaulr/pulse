@@ -5,12 +5,16 @@ import 'package:go_router/go_router.dart';
 import '../../core/routing/app_routes.dart';
 import '../../core/theme/pulse_theme.dart';
 import '../../core/theme/theme_mode_controller.dart';
+import '../../shared/data/ledger_controller.dart';
 import '../../shared/models/models.dart';
 import '../../shared/widgets/widgets.dart';
 import '../auth/data/auth_controller.dart';
+import '../cards/data/cards_repository.dart';
 import 'data/home_repository.dart';
+import 'data/home_snapshot.dart';
 import 'widgets/balance_summary_view.dart';
 import 'widgets/home_header.dart';
+import 'widgets/money_move_sheet.dart';
 import 'widgets/quick_actions.dart';
 import 'widgets/recent_activity_section.dart';
 
@@ -23,6 +27,9 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final snapshot = ref.watch(homeSnapshotProvider);
+    final isCardFrozen = ref.watch(
+      frozenCardsProvider.select((ids) => ids.contains(snapshot.card.id)),
+    );
     final colors = context.pulseColors;
 
     return Scaffold(
@@ -57,6 +64,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 child: PulsePaymentCard(
                   card: snapshot.card,
+                  frozen: isCardFrozen,
                   onTap: () => context.go(AppRoutes.cards),
                   onMoreTap: () => _notImplemented(context, 'Card options'),
                 ),
@@ -70,17 +78,32 @@ class HomeScreen extends ConsumerWidget {
                   QuickAction(
                     icon: Icons.arrow_downward_rounded,
                     label: 'Deposit',
-                    onTap: () => _notImplemented(context, 'Deposit'),
+                    onTap: () => _openMoneyMove(
+                      context,
+                      ref,
+                      MoneyMoveKind.deposit,
+                      snapshot,
+                    ),
                   ),
                   QuickAction(
                     icon: Icons.swap_horiz_rounded,
                     label: 'Transfer',
-                    onTap: () => _notImplemented(context, 'Transfer'),
+                    onTap: () => _openMoneyMove(
+                      context,
+                      ref,
+                      MoneyMoveKind.transfer,
+                      snapshot,
+                    ),
                   ),
                   QuickAction(
                     icon: Icons.arrow_upward_rounded,
                     label: 'Withdraw',
-                    onTap: () => _notImplemented(context, 'Withdraw'),
+                    onTap: () => _openMoneyMove(
+                      context,
+                      ref,
+                      MoneyMoveKind.withdraw,
+                      snapshot,
+                    ),
                   ),
                   QuickAction(
                     icon: Icons.grid_view_rounded,
@@ -197,6 +220,50 @@ class HomeScreen extends ConsumerWidget {
         );
       },
     );
+  }
+
+  /// Opens the Deposit/Withdraw/Send sheet and, on a confirmed submit, writes
+  /// the result to [ledgerControllerProvider] — the same state
+  /// [homeSnapshotProvider] and the Transactions feed both read.
+  Future<void> _openMoneyMove(
+    BuildContext context,
+    WidgetRef ref,
+    MoneyMoveKind kind,
+    HomeSnapshot snapshot,
+  ) async {
+    final result = await showModalBottomSheet<MoneyMoveResult>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => MoneyMoveSheet(
+        kind: kind,
+        availableBalance: snapshot.balance.total,
+        currencySymbol: snapshot.balance.currencySymbol,
+      ),
+    );
+    if (result == null || !context.mounted) return;
+
+    final ledger = ref.read(ledgerControllerProvider.notifier);
+    final symbol = snapshot.balance.currencySymbol;
+    final amountLabel = result.amount.toStringAsFixed(0);
+    final String message;
+    switch (kind) {
+      case MoneyMoveKind.deposit:
+        ledger.deposit(result.amount);
+        message = 'Deposited $symbol$amountLabel';
+      case MoneyMoveKind.withdraw:
+        ledger.withdraw(result.amount);
+        message = 'Withdrew $symbol$amountLabel';
+      case MoneyMoveKind.transfer:
+        ledger.transfer(result.amount, recipient: result.recipient!);
+        message = 'Sent $symbol$amountLabel to ${result.recipient}';
+    }
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+      );
   }
 
   /// These controls are live to the touch but own no behaviour yet, so say so
