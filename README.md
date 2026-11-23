@@ -1,5 +1,7 @@
 # **Pulse**
 
+[![Flutter CI](https://github.com/bipaulr/pulse/actions/workflows/flutter-ci.yml/badge.svg)](https://github.com/bipaulr/pulse/actions/workflows/flutter-ci.yml)
+
 Pulse is a premium personal-finance app built in Flutter — a mobile-first\
 fintech experience covering onboarding, authentication, a financial\
 dashboard, card management, transaction tracking, and spending analytics,\
@@ -41,6 +43,12 @@ evaluated end to end without a backend.
 - Category breakdown
 - Recent transfers
 
+### **Budgets**
+
+- Monthly spending caps per category, with a progress bar and over-budget state
+- Add a cap on any unbudgeted category, or edit/remove an existing one
+- Spend-to-date is computed live from the same transaction data Activity uses
+
 ### **Authentication**
 
 - Branded splash screen
@@ -59,7 +67,7 @@ evaluated end to end without a backend.
 
 ## **Technical Highlights**
 
-**State management with Riverpod** — Every feature (Home, Cards, Transactions, Activity, Auth) is backed by a repository interface and exposed through Riverpod providers. Screens `watch` derived state; mutations go through notifiers. This keeps UI, business logic, and data sources cleanly separated and easy to test in isolation.
+**State management with Riverpod** — Every feature (Home, Cards, Transactions, Activity, Budgets, Auth) is backed by a repository interface and exposed through Riverpod providers. Screens `watch` derived state; mutations go through notifiers. This keeps UI, business logic, and data sources cleanly separated and easy to test in isolation.
 
 **Custom-built chart** — The spending visualization (`PulseSpendingChart`) is not a charting library. It's built from plain Flutter widgets plus a small `CustomPainter` for the axis gridlines, with its own tween-based animation for bar entrance and period transitions.
 
@@ -67,7 +75,7 @@ evaluated end to end without a backend.
 
 **Responsive by construction** — The layout is verified in Chrome at 320×640, 360×800, 390×844, 412×915, and a desktop width, with a maximum content width applied on wide viewports so the UI reads as an intentional phone-first layout rather than a stretched mobile page.
 
-**Test coverage** — 182 automated tests (`flutter test`) covering the design-system components, screen behavior, analytics calculations, authentication and route-guard logic, and personalization, alongside a clean `flutter analyze`.
+**Test coverage** — automated tests (`flutter test`) covering the design-system components, screen behavior, analytics calculations, authentication and route-guard logic, budgets, and personalization, alongside a clean `flutter analyze`. Enforced on every push via CI (see badge above).
 
 ## **Architecture**
 
@@ -108,7 +116,7 @@ lib/
   features/
     auth/                 Splash, onboarding, login, sign-up, forgot
                           password, auth state
-    home/  cards/  transactions/  activity/
+    home/  cards/  transactions/  activity/  budgets/
                           One folder per screen, each with its own
                           data/ (repository + providers) and widgets/
 ```
@@ -134,7 +142,7 @@ Screenshots aren't included in this repository yet. To generate your own:
 flutter run -d chrome --web-browser-flag="--window-size=412,915"
 ```
 
-Then capture the onboarding flow and each of the four tabs (Home, Cards, Transactions, Activity).
+Then capture the onboarding flow and each of the five tabs (Home, Cards, Transactions, Activity, Budgets).
 
 ## **Demo Account**
 
@@ -164,7 +172,7 @@ On first launch you'll see onboarding — skip it or step through, then sign in 
 
 ```
 flutter analyze   # no issues
-flutter test      # 182 passed
+flutter test      # see CI badge above for the current pass count
 ```
 
 The app has been manually verified in Chrome at the following viewport widths, with no layout overflow:
