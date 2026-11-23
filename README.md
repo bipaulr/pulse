@@ -75,7 +75,7 @@ evaluated end to end without a backend.
 
 **Responsive by construction** — The layout is verified in Chrome at 320×640, 360×800, 390×844, 412×915, and a desktop width, with a maximum content width applied on wide viewports so the UI reads as an intentional phone-first layout rather than a stretched mobile page.
 
-**Test coverage** — automated tests (`flutter test`) covering the design-system components, screen behavior, analytics calculations, authentication and route-guard logic, budgets, and personalization, alongside a clean `flutter analyze`. Enforced on every push via CI (see badge above).
+**Test coverage** — 203 automated tests (`flutter test`) covering the design-system components, screen behavior, analytics calculations, authentication and route-guard logic, budgets, and personalization, alongside a clean `flutter analyze`. Enforced on every push via CI (see badge above).
 
 ## **Architecture**
 
@@ -172,7 +172,7 @@ On first launch you'll see onboarding — skip it or step through, then sign in 
 
 ```
 flutter analyze   # no issues
-flutter test      # see CI badge above for the current pass count
+flutter test      # 203 passed
 ```
 
 The app has been manually verified in Chrome at the following viewport widths, with no layout overflow:
