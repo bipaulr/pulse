@@ -32,6 +32,7 @@ void main() {
     'cards': AppRoutes.cards,
     'txns': AppRoutes.transactions,
     'activity': AppRoutes.activity,
+    'budgets': AppRoutes.budgets,
   };
 
   const sizes = {
