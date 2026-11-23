@@ -11,6 +11,7 @@ import '../../features/auth/login_screen.dart';
 import '../../features/auth/onboarding_screen.dart';
 import '../../features/auth/signup_screen.dart';
 import '../../features/auth/splash_screen.dart';
+import '../../features/budgets/budgets_screen.dart';
 import '../../features/cards/cards_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/transactions/transaction_details_screen.dart';
@@ -84,6 +85,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
           _branch(AppRoutes.activity, const ActivityScreen()),
+          _branch(AppRoutes.budgets, const BudgetsScreen()),
         ],
       ),
     ],

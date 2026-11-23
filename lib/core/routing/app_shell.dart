@@ -27,6 +27,10 @@ class AppShell extends StatelessWidget {
       icon: Icons.pie_chart_rounded,
       label: 'Activity',
     ),
+    PulseNavigationDestination(
+      icon: Icons.account_balance_wallet_rounded,
+      label: 'Budgets',
+    ),
   ];
 
   @override

@@ -13,6 +13,7 @@ abstract final class AppRoutes {
   static const cards = '/cards';
   static const transactions = '/transactions';
   static const activity = '/activity';
+  static const budgets = '/budgets';
 
   /// Path segment of the transaction details route, relative to
   /// [transactions].
@@ -20,9 +21,9 @@ abstract final class AppRoutes {
 
   static String transactionDetails(String id) => '$transactions/$id';
 
-  /// The four tabs behind the bottom navigation — the routes that require an
+  /// The tabs behind the bottom navigation — the routes that require an
   /// authenticated session.
-  static const protected = {home, cards, transactions, activity};
+  static const protected = {home, cards, transactions, activity, budgets};
 
   static const initial = splash;
 }
